@@ -34,4 +34,3 @@ def init_ukraine():
 def init_france():
     pass
 
-init_ukraine()
