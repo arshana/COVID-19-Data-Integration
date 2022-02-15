@@ -21,37 +21,17 @@ def init_italy():
 
 # Starts on 3/3/2020.
 def init_ukraine():
-    dt = datetime.datetime.today()
-    for year in range(2020, int(dt.year) + 1):
-        start_month = 1
-        if (year == 2020):
-            start_month = 3
-        end_month = 13
-        if (year == int(dt.year)):
-            end_month = int(dt.month) + 1
-        for month in range(start_month, end_month):
-            start_day = 1
-            if (year == 2020 and start_month == 3):
-                start_day = 3
-            end_day = 32
-            if (year == int(dt.year) and month == int(dt.month)):
-                end_day = dt.day + 1
-            for day in range(start_day, end_day):
-                if (isValidDate(year, month, day)):
-                    csv_name = 'https://raw.githubusercontent.com/dmytro-derkach/covid-19-ukraine/master/daily_reports/' + ('0' if month < 10 else '')  + str(month) + '-' + ('0' if day < 10 else '') + str(day) + '-' + str(year) + '.csv'
-                    try:
-                        df = pd.read_csv(csv_name, error_bad_lines=False)
-                    except:
-                        print('Ukraine init failed on ' + csv_name)
+    dt = datetime.datetime(2020, 3, 3)
+    while (True):
+        csv_name = 'https://raw.githubusercontent.com/dmytro-derkach/covid-19-ukraine/master/daily_reports/' + ('0' if dt.month < 10 else '')  + str(dt.month) + '-' + ('0' if dt.day < 10 else '') + str(dt.day) + '-' + str(dt.year) + '.csv'
+        print(csv_name)
+        try:
+            df = pd.read_csv(csv_name, error_bad_lines=False)
+        except:
+            break
+        dt += datetime.timedelta(days=1)
 
 def init_france():
     pass
 
-def isValidDate(year, month, day):
-    isValidDate = True
-    try:
-        datetime.datetime(int(year), int(month), int(day))
-    except ValueError:
-        isValidDate = False
-    return isValidDate
-
+init_ukraine()
