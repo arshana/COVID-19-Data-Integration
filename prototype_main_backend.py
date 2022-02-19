@@ -10,10 +10,9 @@ c.execute('''
             country_name VARCHAR(128) UNIQUE NOT NULL
             )
           ''')
-
 c.execute('''
             CREATE TABLE Regions(
-            region_code BIGINT IDENTITY(1, 1) PRIMARY KEY,
+            region_code INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             region_name VARCHAR(128) NOT NULL,
             country_code VARCHAR(2) NOT NULL,
             longitude FLOAT NULL,
@@ -24,7 +23,7 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Districts(
-                district_code BIGINT IDENTITY(1, 1) PRIMARY KEY,
+                district_code INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 district_name VARCHAR(128) NOT NULL,
                 region_code VARCHAR(5) NOT NULL,
                 longitude FLOAT NULL,
@@ -35,14 +34,14 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Sources(
-                source_id BIGINT IDENTITY(1, 1) PRIMARY KEY,
+                source_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                 source_information VARCHAR(256) UNIQUE NOT NULL
             )
           ''')
 
 c.execute('''
             CREATE TABLE Cases_Per_Country(
-                country_code VARCHAR(2) PRIMARY KEY,
+                country_code VARCHAR(2) ,
                 date_collected DATETIME2 NOT NULL,
                 source_id BIGINT NOT NULL,
                 death_numbers INT NULL,
@@ -55,7 +54,7 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Cases_Per_Region(
-                region_code BIGINT PRIMARY KEY,
+                region_code BIGINT,
                 date_collected DATETIME2 NOT NULL,
                 source_id BIGINT NOT NULL,
                 death_numbers INT NULL,
@@ -68,7 +67,7 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Cases_Per_District(
-                district_code BIGINT PRIMARY KEY,
+                district_code BIGINT,
                 date_collected DATETIME2 NOT NULL,
                 source_id BIGINT NOT NULL,
                 death_numbers INT NULL,
@@ -81,7 +80,7 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Vaccinations_Per_Country(
-                vaccination_rate INT NOT NULL,
+                vaccination_rate FLOAT NOT NULL,
                 country_code VARCHAR(2) PRIMARY KEY,
                 source_id BIGINT NOT NULL,
                 FOREIGN KEY (country_code) REFERENCES Countries(country_code),
@@ -91,7 +90,7 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Vaccinations_Per_Region(
-                vaccination_rate INT NOT NULL,
+                vaccination_rate FLOAT NOT NULL,
                 region_code BIGINT PRIMARY KEY,
                 source_id BIGINT NOT NULL,
                 FOREIGN KEY (region_code) REFERENCES Regions(region_code),
@@ -101,12 +100,36 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Vaccinations_Per_District(
-                vaccination_rate INT NOT NULL,
+                vaccination_rate FLOAT NOT NULL,
                 district_code BIGINT PRIMARY KEY,
                 source_id BIGINT NOT NULL,
                 FOREIGN KEY (district_code) REFERENCES Districts(district_code),
                 FOREIGN KEY (source_id) REFERENCES Sources(source_id)
             )
           ''')
+
+c.execute('''CREATE TABLE Population_Per_Country(
+            country_code VARCHAR(2) PRIMARY KEY,
+            population_amount BIGINT NOT NULL,
+            date_collected DATETIME2 NOT NULL,
+            FOREIGN KEY (country_code) REFERENCES Countries(country_code)
+        ); 
+        ''')
+
+c.execute('''CREATE TABLE Population_Per_Region(
+            region_code BIGINT PRIMARY KEY,
+            population_amount BIGINT NOT NULL,
+            date_collected DATETIME2 NOT NULL,
+            FOREIGN KEY (region_code) REFERENCES Regions(region_code)
+        );
+         ''')
+
+c.execute('''CREATE TABLE Population_Per_District(
+            district_code BIGINT PRIMARY KEY,
+            population_amount BIGINT NOT NULL,
+            date_collected DATETIME2 NOT NULL,
+            FOREIGN KEY (district_code) REFERENCES Districts(district_code)
+        ); 
+        ''')
                   
 conn.commit()
