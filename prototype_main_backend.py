@@ -1,6 +1,21 @@
 import sqlite3
 import pandas as pd
 
+def get_country_code(country_name, c):
+  c.execute("SELECT country_code FROM Countries WHERE country_name = '" + country_name + "'")
+  result = c.fetchall()
+  return result[0][0]
+
+# source_info is typically a general url for the data source
+def set_source(source_info, c, conn):
+  c.execute("INSERT INTO Sources (source_information) VALUES('" + source_info + "');")
+  conn.commit()
+
+def get_source_id(source_info, c):
+  c.execute("SELECT source_id FROM Sources WHERE source_information = '" + source_info + "'")
+  result = c.fetchall()
+  return result[0][0]
+
 conn = sqlite3.connect('prototype_db')
 c = conn.cursor()
 
@@ -133,3 +148,10 @@ c.execute('''CREATE TABLE Population_Per_District(
         ''')
                   
 conn.commit()
+
+#insert country_countryCode table
+countries = pd.read_csv('country_countryCode.csv')
+countries = countries.rename(columns={"Name": "country_name", "Code": "country_code"})
+countries.to_sql('Countries',con=conn, if_exists = 'append', index=False)
+
+c.close()

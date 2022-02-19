@@ -4,12 +4,6 @@ import pandas as pd
 conn = sqlite3.connect('prototype_db')
 c = conn.cursor()
 
-
-#insert country_countryCode table
-countries = pd.read_csv('country_countryCode.csv')
-countries = countries.rename(columns={"Name": "country_name", "Code": "country_code"})
-countries.to_sql('Countries',con=conn, if_exists = 'append', index=False)
-
 # get country_code for Japan
 c.execute("SELECT country_code from Countries where country_name = 'Japan'")
 result = c.fetchall()

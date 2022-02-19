@@ -1,5 +1,7 @@
 import pandas as pd
+import sqlite3
 import datetime
+from prototype_main_backend import *
 
 # Use this for European countries only. Other countries appear to be either unreliable or have a lot of holes in their data.
 def init_jrc():
@@ -30,6 +32,19 @@ def init_ukraine():
         except:
             break
         dt += datetime.timedelta(days=1)
+
+    conn = sqlite3.connect('prototype_db')
+    c = conn.cursor()
+
+    # get country_code for Ukraine
+    ukraine_code = get_country_code("Ukraine", c)
+    print(ukraine_code)
+
+    # insert and get source id for Ukraine source
+    ukraine_src_url = "https://github.com/dmytro-derkach/covid-19-ukraine"
+    set_source(ukraine_src_url, c, conn)
+    ukraine_src = get_source_id(ukraine_src_url, c)
+    print(ukraine_src)
 
 def init_france():
     pass
