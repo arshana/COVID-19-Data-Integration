@@ -21,18 +21,8 @@ def init_italy():
     df_region = pd.read_csv('https://raw.githubusercontent.com/RamiKrispin/covid19Italy/master/csv/italy_region.csv', error_bad_lines=False)
     df_subregion = pd.read_csv('https://raw.githubusercontent.com/RamiKrispin/covid19Italy/master/csv/italy_province.csv', error_bad_lines=False)
 
-# Starts on 3/3/2020.
+# Starts on 03/03/2020.
 def init_ukraine():
-    dt = datetime.datetime(2020, 3, 3)
-    while (True):
-        csv_name = 'https://raw.githubusercontent.com/dmytro-derkach/covid-19-ukraine/master/daily_reports/' + ('0' if dt.month < 10 else '')  + str(dt.month) + '-' + ('0' if dt.day < 10 else '') + str(dt.day) + '-' + str(dt.year) + '.csv'
-        print(csv_name)
-        try:
-            df = pd.read_csv(csv_name, error_bad_lines=False)
-        except:
-            break
-        dt += datetime.timedelta(days=1)
-
     conn = sqlite3.connect('prototype_db')
     c = conn.cursor()
 
@@ -45,6 +35,32 @@ def init_ukraine():
     set_source(ukraine_src_url, c, conn)
     ukraine_src = get_source_id(ukraine_src_url, c)
     print(ukraine_src)
+
+    # set up regions for Ukraine; selected a random csv with all the regions
+    random_csv = 'https://raw.githubusercontent.com/dmytro-derkach/covid-19-ukraine/master/daily_reports/03-03-2021.csv'
+    df = pd.read_csv(random_csv, error_bad_lines=False)
+    for row in df.itertuples():
+      sql = '''INSERT INTO Regions (region_name, country_code, longitude, latitude) VALUES (?, ?, ?, ?)'''
+      c.execute(sql,(row.Province_State, ukraine_code, row.Long_, row.Lat))
+    conn.commit()
+
+    # Add data to Cases_Per_Region
+    dt = datetime.datetime(2020, 3, 3)
+    while (True):
+        csv_name = 'https://raw.githubusercontent.com/dmytro-derkach/covid-19-ukraine/master/daily_reports/' + ('0' if dt.month < 10 else '')  + str(dt.month) + '-' + ('0' if dt.day < 10 else '') + str(dt.day) + '-' + str(dt.year) + '.csv'
+        print(csv_name)
+        try:
+            df = pd.read_csv(csv_name, error_bad_lines=False)
+            for row in df.itertuples():
+                sql = "SELECT region_code FROM Regions WHERE region_name = '" + row.Province_State + "' AND country_code = '" + ukraine_code + "';"
+                c.execute(sql)
+                region_code = c.fetchall()[0][0]
+                sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
+                c.execute(sql,(region_code, row.Last_Update, ukraine_src, row.Deaths_delta, row.Confirmed_delta, row.Recovered_delta))
+            conn.commit()
+        except:
+            break
+        dt += datetime.timedelta(days=1)
 
 def init_france():
     pass
