@@ -21,6 +21,21 @@ def init_italy():
     df_region = pd.read_csv('https://raw.githubusercontent.com/RamiKrispin/covid19Italy/master/csv/italy_region.csv', error_bad_lines=False)
     df_subregion = pd.read_csv('https://raw.githubusercontent.com/RamiKrispin/covid19Italy/master/csv/italy_province.csv', error_bad_lines=False)
 
+    conn = sqlite3.connect('prototype_db')
+    c = conn.cursor()
+
+    # get country_code
+    italy_code = get_country_code("Italy", c)
+    print(italy_code)
+
+    # insert and get source id for source
+    italy_src_url = "https://github.com/RamiKrispin/covid19italy"
+    set_source(italy_src_url, c, conn)
+    italy_src = get_source_id(italy_src_url, c)
+    print(italy_src)
+
+    conn.close()
+
 # Starts on 03/03/2020.
 def init_ukraine():
     conn = sqlite3.connect('prototype_db')
@@ -61,6 +76,8 @@ def init_ukraine():
         except:
             break
         dt += datetime.timedelta(days=1)
+    
+    conn.close()
 
 def init_france():
     pass
