@@ -83,9 +83,9 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Vaccinations_Per_Country(
-                first_vaccination_rate FLOAT NOT NULL,
-                second_vaccination_rate FLOAT NOT NULL,
-                third_vaccination_rate FLOAT NOT NULL,
+                first_vaccination_number BIGINT NOT NULL,
+                second_vaccination_number BIGINT NOT NULL,
+                third_vaccination_number BIGINT NOT NULL,
                 country_code VARCHAR(2) PRIMARY KEY,
                 source_id BIGINT NOT NULL,
                 FOREIGN KEY (country_code) REFERENCES Countries(country_code),
@@ -95,9 +95,9 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Vaccinations_Per_Region(
-                first_vaccination_rate FLOAT NOT NULL,
-                second_vaccination_rate FLOAT NOT NULL,
-                third_vaccination_rate FLOAT NOT NULL,
+                first_vaccination_number BIGINT NOT NULL,
+                second_vaccination_number BIGINT NOT NULL,
+                third_vaccination_number BIGINT NOT NULL,
                 region_code BIGINT PRIMARY KEY,
                 source_id BIGINT NOT NULL,
                 FOREIGN KEY (region_code) REFERENCES Regions(region_code),
@@ -107,9 +107,9 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Vaccinations_Per_District(
-                first_vaccination_rate FLOAT NOT NULL,
-                second_vaccination_rate FLOAT NOT NULL,
-                third_vaccination_rate FLOAT NOT NULL,
+                first_vaccination_number BIGINT NOT NULL,
+                second_vaccination_number BIGINT NOT NULL,
+                third_vaccination_number BIGINT NOT NULL,
                 district_code BIGINT PRIMARY KEY,
                 source_id BIGINT NOT NULL,
                 FOREIGN KEY (district_code) REFERENCES Districts(district_code),
@@ -149,6 +149,5 @@ countries = countries.rename(columns={"Name": "country_name", "Code": "country_c
 countries.to_sql('Countries',con=conn, if_exists = 'append', index=False)
 
 c.close()
-
 from initial_data_scripts.init_europe import init_italy, init_ukraine
 from initial_data_scripts.init_asia import init_japan, init_korea
