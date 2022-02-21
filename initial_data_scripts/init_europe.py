@@ -1,7 +1,11 @@
 import pandas as pd
 import sqlite3
 import datetime
-from prototype_main_backend import *
+import sys
+
+sys.path.append("..")
+
+from util import *
 
 # Use this for European countries only. Other countries appear to be either unreliable or have a lot of holes in their data.
 def init_jrc():
@@ -92,13 +96,11 @@ def init_ukraine():
 
     # get country_code for Ukraine
     ukraine_code = get_country_code("Ukraine", c)
-    print(ukraine_code)
 
     # insert and get source id for Ukraine source
     ukraine_src_url = "https://github.com/dmytro-derkach/covid-19-ukraine"
     set_source(ukraine_src_url, c, conn)
     ukraine_src = get_source_id(ukraine_src_url, c)
-    print(ukraine_src)
 
     # set up regions for Ukraine; selected a random csv with all the regions
     random_csv = 'https://raw.githubusercontent.com/dmytro-derkach/covid-19-ukraine/master/daily_reports/03-03-2021.csv'
@@ -112,7 +114,6 @@ def init_ukraine():
     dt = datetime.datetime(2020, 3, 3)
     while (True):
         csv_name = 'https://raw.githubusercontent.com/dmytro-derkach/covid-19-ukraine/master/daily_reports/' + ('0' if dt.month < 10 else '')  + str(dt.month) + '-' + ('0' if dt.day < 10 else '') + str(dt.day) + '-' + str(dt.year) + '.csv'
-        print(csv_name)
         try:
             df = pd.read_csv(csv_name, error_bad_lines=False)
             for row in df.itertuples():
@@ -130,5 +131,3 @@ def init_ukraine():
 
 def init_france():
     pass
-
-init_italy()
