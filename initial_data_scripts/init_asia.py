@@ -1,6 +1,7 @@
 import pandas as pd
 import sqlite3
 import sys
+import datetime
 
 sys.path.append("..")
 
@@ -10,6 +11,16 @@ from util import *
 !pip install google_trans_new
 from google_trans_new import google_translator  
 translator = google_translator() 
+
+#install html parse tool
+from urllib.request import urlopen
+!pip install beautifulsoup4
+from bs4 import BeautifulSoup
+from urllib.request import urlopen
+
+
+def string_to_int(s):
+    return s.replace(",", "").strip()
 
 def init_japan():
     conn = sqlite3.connect('prototype_db')
@@ -118,8 +129,8 @@ def init_korea():
     for index, row in korea_case.iterrows():
         if index == 3:
             for i in range(2, len(row) - 1):
-                city = translator.translate(row[i])
-                if city == "game ":
+                city = translator.translate(row[i]).replace(" ", "")
+                if city == "game":
                     city = "Gyeonggi"
                 sql = '''INSERT INTO Regions (region_name, country_code) VALUES (?, ?)'''
                 c.execute(sql,(city, korea_code))
@@ -131,7 +142,7 @@ def init_korea():
     #insert data for korea and region of it
     for index, row in korea.iterrows():
         if index >= 11:
-            date = row[0]
+            date = row[0].date()
             cases = row[1]
             death =  row["Unnamed: 4_y"]
             sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers) VALUES (?, ?, ?, ?, ?)'''
@@ -142,5 +153,72 @@ def init_korea():
                 city_code = index_region[i][1]
                 c.execute(sql,(city_code, date, korea_src, row[i]))
     conn.commit()
-    conn.close()
     
+    #get vaccination number data for korea
+    url = "https://ncv.kdca.go.kr/mainStatus.es?mid=a11702000000"
+    page = urlopen(url)
+    html_bytes = page.read()
+    html = html_bytes.decode("utf-8")
+    soup = BeautifulSoup(html, "html.parser")
+    text = soup.get_text()
+    text1 = translator.translate(text)
+    text1 = text1.splitlines()
+    v = {}
+    for i in range(0, len(text1)):
+        line = text1[i]
+        if line == "Cumulative A + B":
+            v1 = int(string_to_int(text1[i + 1]))
+            v2 = int(string_to_int(text1[i + 2]))
+            v3 = int(string_to_int(text1[i + 3]))
+            v["all"] = [v1, v2, v3]
+        if line == "game":
+            v1 = int(string_to_int(text1[i + 2]))
+            v2 = int(string_to_int(text1[i + 4]))
+            v3 = int(string_to_int(text1[i + 6]))
+            v["Gyeonggi"] = [v1, v2, v3]
+        if line in region_dict.keys():
+            v1 = int(string_to_int(text1[i + 2]))
+            v2 = int(string_to_int(text1[i + 4]))
+            v3 = int(string_to_int(text1[i + 6]))
+            v[line] = [v1, v2, v3]
+
+    #get population data for korea
+    url = "https://www.citypopulation.de/en/southkorea/cities/"
+    page = urlopen(url)
+    html_bytes = page.read()
+    html = html_bytes.decode("utf-8")
+    soup = BeautifulSoup(html, "html.parser")
+    text = soup.get_text(separator='\n')
+    text = text.splitlines()
+    p = {}
+    for i in range(0, len(text)):
+        line = text[i]
+        if line == "KOR":
+            p["all"] = int(string_to_int(text[i + 9]))
+        index = line.find("-do")
+        if index != -1:
+            line = line[0:index]
+            line = line.replace("cheong", "")
+            line = line.replace("lla", "n")
+            line = line.replace("sang", "")
+        if line in region_dict.keys() and text[i - 1] == "":
+            if line not in p:
+                if text[i + 1].find("[") != -1:
+                    i = i + 3
+                p[line] = int(string_to_int(text[i + 11]))
+
+    #Insert population and vaccinations data for korea
+    sql = '''INSERT INTO Population_Per_Country (country_code, population_amount, date_collected) VALUES (?, ?, ?)'''
+    c.execute(sql,(korea_code, p["all"], datetime.datetime(2020, 11, 1).date()))
+    sql = '''INSERT INTO Vaccinations_Per_Country (first_vaccination_rate, second_vaccination_rate,  third_vaccination_rate, country_code, source_id) VALUES (?, ?, ?, ?, ?)'''
+    c.execute(sql,(v["all"][0] / p["all"], v["all"][1] / p["all"], v["all"][2] / p["all"], korea_code, korea_src))
+    conn.commit()
+
+    for city in region_dict.keys():
+        city_code = region_dict[city]
+        sql = '''INSERT INTO Population_Per_Region (region_code, population_amount, date_collected) VALUES (?, ?, ?)'''
+        c.execute(sql,(city_code, p[city], datetime.datetime(2020, 11, 1).date()))
+        sql = '''INSERT INTO Vaccinations_Per_Region (first_vaccination_rate, second_vaccination_rate,  third_vaccination_rate, region_code, source_id) VALUES (?, ?, ?, ?, ?)'''
+        c.execute(sql,(v[city][0] / p[city], v[city][1] / p[city], v[city][2] / p[city], city_code, korea_src))
+    conn.commit()
+    conn.close()
