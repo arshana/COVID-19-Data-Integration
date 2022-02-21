@@ -39,7 +39,7 @@ CREATE TABLE Sources(
 -- information on cases, recovery numbers, and deaths
 -- per countries
 CREATE TABLE Cases_Per_Country(
-    country_code VARCHAR(2) PRIMARY KEY,
+    country_code VARCHAR(2),
     date_collected DATETIME2 NOT NULL,
     source_id BIGINT NOT NULL,
     death_numbers INT NULL,
@@ -53,7 +53,7 @@ CREATE TABLE Cases_Per_Country(
 -- information on cases, recovery numbers, and deaths
 -- per region
 CREATE TABLE Cases_Per_Region(
-    region_code BIGINT PRIMARY KEY,
+    region_code BIGINT,
     date_collected DATETIME2 NOT NULL,
     source_id BIGINT NOT NULL,
     death_numbers INT NULL,
@@ -67,7 +67,7 @@ CREATE TABLE Cases_Per_Region(
 -- information on cases, recovery numbers, and deaths
 -- per district
 CREATE TABLE Cases_Per_District(
-    district_code BIGINT PRIMARY KEY,
+    district_code BIGINT,
     date_collected DATETIME2 NOT NULL,
     source_id BIGINT NOT NULL,
     death_numbers INT NULL,
@@ -80,7 +80,9 @@ CREATE TABLE Cases_Per_District(
 
 -- keeps track of vaccinations per Country
 CREATE TABLE Vaccinations_Per_Country(
-    vaccination_rate INT NOT NULL,
+    first_vaccination_rate FLOAT NOT NULL,
+    second_vaccination_rate FLOAT NOT NULL,
+    third_vaccination_rate FLOAT NOT NULL,
     country_code VARCHAR(2) PRIMARY KEY,
     source_id BIGINT NOT NULL,
     FOREIGN KEY (country_code) REFERENCES Countries(country_code),
@@ -89,7 +91,9 @@ CREATE TABLE Vaccinations_Per_Country(
 
 -- keeps track of vaccinations per Region
 CREATE TABLE Vaccinations_Per_Region(
-    vaccination_rate INT NOT NULL,
+    first_vaccination_rate FLOAT NOT NULL,
+    second_vaccination_rate FLOAT NOT NULL,
+    third_vaccination_rate FLOAT NOT NULL,
     region_code BIGINT PRIMARY KEY,
     source_id BIGINT NOT NULL,
     FOREIGN KEY (region_code) REFERENCES Regions(region_code),
@@ -98,7 +102,9 @@ CREATE TABLE Vaccinations_Per_Region(
 
 -- keeps track of vaccinations per District
 CREATE TABLE Vaccinations_Per_District(
-    vaccination_rate INT NOT NULL,
+    first_vaccination_rate FLOAT NOT NULL,
+    second_vaccination_rate FLOAT NOT NULL,
+    third_vaccination_rate FLOAT NOT NULL,
     district_code BIGINT PRIMARY KEY,
     source_id BIGINT NOT NULL,
     FOREIGN KEY (district_code) REFERENCES Districts(district_code),
