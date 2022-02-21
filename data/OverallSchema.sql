@@ -22,7 +22,7 @@ CREATE TABLE Regions(
 CREATE TABLE Districts(
     district_code BIGINT IDENTITY(1, 1) PRIMARY KEY,
     district_name VARCHAR(128) NOT NULL,
-    region_code VARCHAR(5) NOT NULL,
+    region_code BIGINT NOT NULL,
     longitude FLOAT NULL,
     latitude FLOAT NULL,
     FOREIGN KEY (region_code) REFERENCES Regions(region_code)
@@ -45,6 +45,7 @@ CREATE TABLE Cases_Per_Country(
     death_numbers INT NULL,
     case_numbers INT NULL,
     recovery_numbers INT NULL,
+    hospitalization_numbers INT NULL,
     FOREIGN KEY (country_code) REFERENCES Countries(country_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
@@ -58,6 +59,7 @@ CREATE TABLE Cases_Per_Region(
     death_numbers INT NULL,
     case_numbers INT NULL,
     recovery_numbers INT NULL,
+    hospitalization_numbers INT NULL,
     FOREIGN KEY (region_code) REFERENCES Regions(region_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
@@ -71,6 +73,7 @@ CREATE TABLE Cases_Per_District(
     death_numbers INT NULL,
     case_numbers INT NULL,
     recovery_numbers INT NULL,
+    hospitalization_numbers INT NULL,
     FOREIGN KEY (district_code) REFERENCES Districts(district_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
