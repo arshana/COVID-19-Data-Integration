@@ -1,7 +1,5 @@
-from urllib.request import HTTPBasicAuthHandler
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
-from .models import Countries, CasesPerCountry, CasesPerRegion, Regions
 from django.db import connection
 
 # Create your views here.
