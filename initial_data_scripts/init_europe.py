@@ -113,7 +113,8 @@ def init_ukraine():
     # Add data to Cases_Per_Region
     dt = datetime.datetime(2020, 3, 3)
     while (True):
-        csv_name = 'https://raw.githubusercontent.com/dmytro-derkach/covid-19-ukraine/master/daily_reports/' + ('0' if dt.month < 10 else '')  + str(dt.month) + '-' + ('0' if dt.day < 10 else '') + str(dt.day) + '-' + str(dt.year) + '.csv'
+        date = ('0' if dt.month < 10 else '')  + str(dt.month) + '-' + ('0' if dt.day < 10 else '') + str(dt.day) + '-' + str(dt.year)
+        csv_name = 'https://raw.githubusercontent.com/dmytro-derkach/covid-19-ukraine/master/daily_reports/' + date + '.csv'
         try:
             df = pd.read_csv(csv_name, error_bad_lines=False)
             for row in df.itertuples():
@@ -121,7 +122,7 @@ def init_ukraine():
                 c.execute(sql)
                 region_code = c.fetchall()[0][0]
                 sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
-                c.execute(sql,(region_code, row.Last_Update, ukraine_src, row.Deaths_delta, row.Confirmed_delta, row.Recovered_delta))
+                c.execute(sql,(region_code, date, ukraine_src, row.Deaths_delta, row.Confirmed_delta, row.Recovered_delta))
             conn.commit()
         except:
             break

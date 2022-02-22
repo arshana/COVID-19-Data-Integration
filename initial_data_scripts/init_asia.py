@@ -80,9 +80,11 @@ def init_japan():
     from datetime import date
     for index, row in japan_v.iterrows():
         if index == 5:
-            rate = row[3]
-            sql = '''INSERT INTO Vaccinations_Per_Country (vaccination_rate, country_code, source_id) VALUES (?, ?, ?)'''
-            c.execute(sql,(rate, japan_code, japan_src2))
+            rate1 = row[2]
+            rate2 = row[4]
+            rate3 = row[6]
+            sql = '''INSERT INTO Vaccinations_Per_Country (first_vaccination_number, second_vaccination_number,  third_vaccination_number, country_code, source_id) VALUES (?, ?, ?, ?, ?)'''
+            c.execute(sql,(rate1, rate2, rate3, japan_code, japan_src2))
             sql = '''INSERT INTO Population_Per_Country (country_code, population_amount, date_collected) VALUES (?, ?, ?)'''
             c.execute(sql,(japan_code, row[12], date.today()))
             break
@@ -93,9 +95,11 @@ def init_japan():
         if index >=6 and index <= 52:
             city = translator.translate(row[0])
             city = city.split()[1]
-            rate = row[3]
-            sql = '''INSERT INTO Vaccinations_Per_Region (vaccination_rate, region_code, source_id) VALUES (?, ?, ?)'''
-            c.execute(sql,(rate, region_dict[city], japan_src2))
+            rate1 = row[2]
+            rate2 = row[4]
+            rate3 = row[6]
+            sql = '''INSERT INTO Vaccinations_Per_Region (first_vaccination_number, second_vaccination_number,  third_vaccination_number, region_code, source_id) VALUES (?, ?, ?, ?, ?)'''
+            c.execute(sql,(rate1, rate2, rate3, region_dict[city], japan_src2))
             sql = '''INSERT INTO Population_Per_Region (region_code, population_amount, date_collected) VALUES (?, ?, ?)'''
             c.execute(sql,(region_dict[city], row[12], date.today()))
     conn.commit()
@@ -210,15 +214,15 @@ def init_korea():
     #Insert population and vaccinations data for korea
     sql = '''INSERT INTO Population_Per_Country (country_code, population_amount, date_collected) VALUES (?, ?, ?)'''
     c.execute(sql,(korea_code, p["all"], datetime.datetime(2020, 11, 1).date()))
-    sql = '''INSERT INTO Vaccinations_Per_Country (first_vaccination_rate, second_vaccination_rate,  third_vaccination_rate, country_code, source_id) VALUES (?, ?, ?, ?, ?)'''
-    c.execute(sql,(v["all"][0] / p["all"], v["all"][1] / p["all"], v["all"][2] / p["all"], korea_code, korea_src))
+    sql = '''INSERT INTO Vaccinations_Per_Country (first_vaccination_number, second_vaccination_number,  third_vaccination_number, country_code, source_id) VALUES (?, ?, ?, ?, ?)'''
+    c.execute(sql,(v["all"][0], v["all"][1], v["all"][2], korea_code, korea_src))
     conn.commit()
 
     for city in region_dict.keys():
         city_code = region_dict[city]
         sql = '''INSERT INTO Population_Per_Region (region_code, population_amount, date_collected) VALUES (?, ?, ?)'''
         c.execute(sql,(city_code, p[city], datetime.datetime(2020, 11, 1).date()))
-        sql = '''INSERT INTO Vaccinations_Per_Region (first_vaccination_rate, second_vaccination_rate,  third_vaccination_rate, region_code, source_id) VALUES (?, ?, ?, ?, ?)'''
-        c.execute(sql,(v[city][0] / p[city], v[city][1] / p[city], v[city][2] / p[city], city_code, korea_src))
+        sql = '''INSERT INTO Vaccinations_Per_Region (first_vaccination_number, second_vaccination_number,  third_vaccination_number, region_code, source_id) VALUES (?, ?, ?, ?, ?)'''
+        c.execute(sql,(v[city][0], v[city][1], v[city][2], city_code, korea_src))
     conn.commit()
     conn.close()
