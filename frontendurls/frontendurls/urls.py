@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from pages.views import (countries_view, home_view, country_national_view, country_regions_view,
                          region_view, region_districts_view, district_view, country_districts_covid_view,
-                         country_regions_covid_view, region_districts_covid_view)
+                         country_regions_covid_view, region_districts_covid_view, region_vaccination_view)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,5 +30,6 @@ urlpatterns = [
     path('region-district/', region_districts_covid_view),
     path('district/', district_view),
     path('country-regions/', country_regions_view),
-    path('region-districts/', region_districts_view)
+    path('region-districts/', region_districts_view),
+    path('region-vaccinations/', region_vaccination_view)
 ]

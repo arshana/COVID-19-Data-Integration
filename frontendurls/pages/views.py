@@ -129,7 +129,7 @@ def region_districts_covid_view(request:HttpRequest):
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Cases_Per_District, Regions, " +
              "Districts WHERE Regions.region_code = %s COLLATE NOCASE"
-              + " AND Regions.region_code = Districts.district_code AND " 
+              + " AND Regions.region_code = Districts.region_code AND " 
               +  "Districts.district_code = Cases_Per_District.district_code", [request.GET['region-code']])
             columns = [column[0] for column in cursor.description]
             rows = cursor.fetchall()
@@ -189,7 +189,7 @@ def region_districts_view(request:HttpRequest):
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Regions, Districts" +
              " WHERE Regions.region_code = %s COLLATE NOCASE"
-              + " AND Regions.region_code = Districts.district_code", [request.GET['district-code']])
+              + " AND Regions.region_code = Districts.region_code", [request.GET['region-code']])
             columns = [column[0] for column in cursor.description]
             rows = cursor.fetchall()
         results = []
@@ -205,7 +205,7 @@ def country_regions_view(request:HttpRequest):
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Countries, Regions" +
              " WHERE Countries.country_name = %s COLLATE NOCASE"
-              + " AND Countries.country_code = Regions.country_code", [request.GET['district-code']])
+              + " AND Countries.country_code = Regions.country_code", [request.GET['country-name']])
             columns = [column[0] for column in cursor.description]
             rows = cursor.fetchall()
         results = []
@@ -216,7 +216,7 @@ def country_regions_view(request:HttpRequest):
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Countries, Regions" +
              " WHERE Countries.country_code = %s COLLATE NOCASE"
-              + " AND Countries.country_code = Regions.country_code", [request.GET['district-code']])
+              + " AND Countries.country_code = Regions.country_code", [request.GET['country-code']])
             columns = [column[0] for column in cursor.description]
             rows = cursor.fetchall()
         results = []
@@ -225,3 +225,19 @@ def country_regions_view(request:HttpRequest):
         return HttpResponse(results)
     else:
          return HttpResponseBadRequest("<h1> you need the country-name or country-code for this function </h1>")
+
+# shows the vacination information for a given district
+def region_vaccination_view(request:HttpRequest):
+    if 'region-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Regions, Vaccinations_Per_Region" +
+             " WHERE Regions.region_code = %s COLLATE NOCASE"
+              + " AND Regions.region_code = Vaccinations_Per_Region.region_code", [request.GET['region-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+         return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
