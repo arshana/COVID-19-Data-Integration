@@ -16,16 +16,19 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from pages.views import (countries_view, home_view, country_national_view, country_regions_view,
-                         region_view, country_districts_view, region_districts_view, district_view)
+                         region_view, region_districts_view, district_view, country_districts_covid_view,
+                         country_regions_covid_view, region_districts_covid_view)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('countries/', countries_view),
     path('', home_view),
     path('country-national/', country_national_view),
-    path('country-regional/', country_regions_view),
+    path('country-regional/', country_regions_covid_view),
     path('region/', region_view),
-    path('country-district/', country_districts_view),
-    path('region-district/', region_districts_view),
-    path('district/', district_view)
+    path('country-district/', country_districts_covid_view),
+    path('region-district/', region_districts_covid_view),
+    path('district/', district_view),
+    path('country-regions/', country_regions_view),
+    path('region-districts/', region_districts_view)
 ]
