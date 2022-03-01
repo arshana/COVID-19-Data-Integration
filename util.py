@@ -6,7 +6,7 @@ def get_country_code(country_name, c):
 def get_region_code(country_code, region_name, c):
   c.execute('SELECT region_code FROM Regions WHERE country_code = "' + country_code + '" AND region_name = "' + region_name + '"')
   result = c.fetchall()
-  return result[0][0]
+  return result[0][0] if result != [] else None
 
 # TODO Why does this insist on casting region_code to str
 def get_district_code(region_code, district_name, c):
