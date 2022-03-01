@@ -51,9 +51,10 @@ def init_italy():
     for src_code in src_region_codes:
         region_rows = df_region.loc[df_region['region_code'] == src_code]
         region_row = region_rows.iloc[0]
-        sql = '''INSERT INTO Regions (region_name, country_code, longitude, latitude) VALUES (?, ?, ?, ?)'''
-        c.execute(sql,(region_row.region_name, italy_code, region_row.long, region_row.lat))
-    conn.commit()
+        if get_region_code(italy_code, region_row.region_name, c) is None:
+            sql = '''INSERT INTO Regions (region_name, country_code, longitude, latitude) VALUES (?, ?, ?, ?)'''
+            c.execute(sql,(region_row.region_name, italy_code, region_row.long, region_row.lat))
+            conn.commit()
     
     # insert regions
     region_code = get_region_code(italy_code, region_row.region_name, c)
@@ -77,9 +78,10 @@ def init_italy():
         subregion_rows = df_subregion.loc[df_subregion['province_code'] == src_code]
         subregion_row = subregion_rows.iloc[0]
         region_code = get_region_code(italy_code, subregion_row.region_name, c)
-        sql = '''INSERT INTO Districts (district_name, region_code, longitude, latitude) VALUES (?, ?, ?, ?)'''
-        c.execute(sql,(subregion_row.province_name, region_code, subregion_row.long, subregion_row.lat))
-        conn.commit()
+        if get_district_code(region_code, subregion_row.province_name, c) is None:
+            sql = '''INSERT INTO Districts (district_name, region_code, longitude, latitude) VALUES (?, ?, ?, ?)'''
+            c.execute(sql,(subregion_row.province_name, region_code, subregion_row.long, subregion_row.lat))
+            conn.commit()
         subregion_code = get_district_code(region_code, subregion_row.province_name, c)
         for i in range(len(subregion_rows)):
             row = subregion_rows.iloc[i]
@@ -106,9 +108,10 @@ def init_ukraine():
     random_csv = 'https://raw.githubusercontent.com/dmytro-derkach/covid-19-ukraine/master/daily_reports/03-03-2021.csv'
     df = pd.read_csv(random_csv, error_bad_lines=False)
     for row in df.itertuples():
-      sql = '''INSERT INTO Regions (region_name, country_code, longitude, latitude) VALUES (?, ?, ?, ?)'''
-      c.execute(sql,(row.Province_State, ukraine_code, row.Long_, row.Lat))
-    conn.commit()
+        if get_region_code(ukraine_code, row.Province_State, c) is None:
+            sql = '''INSERT INTO Regions (region_name, country_code, longitude, latitude) VALUES (?, ?, ?, ?)'''
+            c.execute(sql,(row.Province_State, ukraine_code, row.Long_, row.Lat))
+            conn.commit()
 
     # Add data to Cases_Per_Region
     dt = datetime.datetime(2020, 3, 3)

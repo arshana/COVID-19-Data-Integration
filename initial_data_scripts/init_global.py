@@ -5,7 +5,7 @@ import datetime
 from util import *
 
 def init_jhu():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('prototype_db_temp')
     c = conn.cursor()
 
     # insert and get source id for source
@@ -30,8 +30,7 @@ def init_jhu_us_states(c, conn, src_id):
     # insert US states in Regions
     for row in setup_df.itertuples():
         region_name = row.Province_State
-        region_code = get_region_code(us_code, region_name, c)
-        if (region_code is None):
+        if get_region_code(us_code, region_name, c) is None:
             sql = '''INSERT INTO Regions (region_name, country_code, longitude, latitude) VALUES (?, ?, ?, ?)'''
             c.execute(sql,(region_name, us_code, row.Long_, row.Lat))
     conn.commit()
