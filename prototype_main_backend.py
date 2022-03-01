@@ -83,10 +83,11 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Vaccinations_Per_Country(
+                date_collected DATETIME2 NOT NULL,
                 first_vaccination_number BIGINT NOT NULL,
                 second_vaccination_number BIGINT NOT NULL,
                 third_vaccination_number BIGINT NOT NULL,
-                country_code VARCHAR(2) PRIMARY KEY,
+                country_code VARCHAR(2),
                 source_id BIGINT NOT NULL,
                 FOREIGN KEY (country_code) REFERENCES Countries(country_code),
                 FOREIGN KEY (source_id) REFERENCES Sources(source_id)
@@ -95,10 +96,11 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Vaccinations_Per_Region(
+                date_collected DATETIME2 NOT NULL,
                 first_vaccination_number BIGINT NOT NULL,
                 second_vaccination_number BIGINT NOT NULL,
                 third_vaccination_number BIGINT NOT NULL,
-                region_code BIGINT PRIMARY KEY,
+                region_code BIGINT,
                 source_id BIGINT NOT NULL,
                 FOREIGN KEY (region_code) REFERENCES Regions(region_code),
                 FOREIGN KEY (source_id) REFERENCES Sources(source_id)
@@ -107,10 +109,11 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Vaccinations_Per_District(
+                date_collected DATETIME2 NOT NULL,
                 first_vaccination_number BIGINT NOT NULL,
                 second_vaccination_number BIGINT NOT NULL,
                 third_vaccination_number BIGINT NOT NULL,
-                district_code BIGINT PRIMARY KEY,
+                district_code BIGINT,
                 source_id BIGINT NOT NULL,
                 FOREIGN KEY (district_code) REFERENCES Districts(district_code),
                 FOREIGN KEY (source_id) REFERENCES Sources(source_id)
@@ -140,6 +143,63 @@ c.execute('''CREATE TABLE Population_Per_District(
             FOREIGN KEY (district_code) REFERENCES Districts(district_code)
         ); 
         ''')
+
+c.execute('''CREATE TABLE Age_Per_Country(
+    date_collected DATETIME2 NOT NULL,
+    country_id VARCHAR(2),
+    source_id BIGINT NOT NULL,
+    age_group VARCHAR(64) NOT NULL,
+    case_number INT NULL,
+    recovery_number INT NULL,
+    hospitalization_number INT NULL,
+    death_number INT NULL,
+    case_rate INT NULL,
+    recovery_rate INT NULL,
+    hospitalization_rate INT NULL,
+    death_rate INT NULL,
+    FOREIGN KEY (country_id) REFERENCES Countries(country_code),
+    FOREIGN KEY (source_id) REFERENCES Sources(source_id)
+);
+        ''')
+
+c.execute('''CREATE TABLE Age_Per_Region(
+    date_collected DATETIME2 NOT NULL,
+    region_id BIGINT,
+    source_id BIGINT NOT NULL,
+    age_group VARCHAR(64) NOT NULL,
+    case_number INT NULL,
+    recovery_number INT NULL,
+    hospitalization_number INT NULL,
+    death_number INT NULL,
+    case_rate INT NULL,
+    recovery_rate INT NULL,
+    hospitalization_rate INT NULL,
+    death_rate INT NULL,
+    FOREIGN KEY (region_id) REFERENCES Regions(region_code),
+    FOREIGN KEY (source_id) REFERENCES Sources(source_id)
+);
+
+        ''')
+
+c.execute('''CREATE TABLE Age_Per_District(
+    date_collected DATETIME2 NOT NULL,
+    district_id BIGINT,
+    source_id BIGINT NOT NULL,
+    age_group VARCHAR(64) NOT NULL,
+    case_number INT NULL,
+    recovery_number INT NULL,
+    hospitalization_number INT NULL,
+    death_number INT NULL,
+    case_rate INT NULL,
+    recovery_rate INT NULL,
+    hospitalization_rate INT NULL,
+    death_rate INT NULL,
+    FOREIGN KEY (district_id) REFERENCES Districts(district_code),
+    FOREIGN KEY (source_id) REFERENCES Sources(source_id)
+);
+
+        ''')
+
                   
 conn.commit()
 

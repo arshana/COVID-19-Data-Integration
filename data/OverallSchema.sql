@@ -83,7 +83,7 @@ CREATE TABLE Vaccinations_Per_Country(
     first_vaccination_number BIGINT NOT NULL,
     second_vaccination_number BIGINT NOT NULL,
     third_vaccination_number BIGINT NOT NULL,
-    country_code VARCHAR(2) PRIMARY KEY,
+    country_code VARCHAR(2) ,
     source_id BIGINT NOT NULL,
     FOREIGN KEY (country_code) REFERENCES Countries(country_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
@@ -94,7 +94,7 @@ CREATE TABLE Vaccinations_Per_Region(
     first_vaccination_number BIGINT NOT NULL,
     second_vaccination_number BIGINT NOT NULL,
     third_vaccination_number BIGINT NOT NULL,
-    region_code BIGINT PRIMARY KEY,
+    region_code BIGINT,
     source_id BIGINT NOT NULL,
     FOREIGN KEY (region_code) REFERENCES Regions(region_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
@@ -105,7 +105,7 @@ CREATE TABLE Vaccinations_Per_District(
     first_vaccination_number BIGINT NOT NULL,
     second_vaccination_number BIGINT NOT NULL,
     third_vaccination_number BIGINT NOT NULL,
-    district_code BIGINT PRIMARY KEY,
+    district_code BIGINT,
     source_id BIGINT NOT NULL,
     FOREIGN KEY (district_code) REFERENCES Districts(district_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
@@ -152,7 +152,8 @@ CREATE TABLE Strains_Per_District(
 
 -- age related data on covid per country
 CREATE TABLE Age_Per_Country(
-    country_id VARCHAR(2) PRIMARY KEY,
+    date_collected DATETIME2 NOT NULL,
+    country_id VARCHAR(2),
     source_id BIGINT NOT NULL,
     age_group VARCHAR(64) NOT NULL,
     case_number INT NULL,
@@ -169,7 +170,8 @@ CREATE TABLE Age_Per_Country(
 
 -- age related data on covid per region
 CREATE TABLE Age_Per_Region(
-    region_id BIGINT PRIMARY KEY,
+    date_collected DATETIME2 NOT NULL,
+    region_id BIGINT,
     source_id BIGINT NOT NULL,
     age_group VARCHAR(64) NOT NULL,
     case_number INT NULL,
@@ -186,7 +188,8 @@ CREATE TABLE Age_Per_Region(
 
 -- age related data on covid per district
 CREATE TABLE Age_Per_District(
-    district_id BIGINT PRIMARY KEY,
+    date_collected DATETIME2 NOT NULL,
+    district_id BIGINT,
     source_id BIGINT NOT NULL,
     age_group VARCHAR(64) NOT NULL,
     case_number INT NULL,
