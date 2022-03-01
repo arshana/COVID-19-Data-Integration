@@ -5,7 +5,7 @@ import datetime
 from util import *
 
 def init_jhu():
-    conn = sqlite3.connect('prototype_db_temp')
+    conn = sqlite3.connect('prototype_db')
     c = conn.cursor()
 
     # insert and get source id for source
@@ -14,6 +14,7 @@ def init_jhu():
     src_id = get_source_id(src_url, c)
     
     init_jhu_us_states(c, conn, src_id)
+    init_jhu_global(c, conn, src_id)
 
     conn.close()
 
@@ -74,7 +75,22 @@ def init_jhu_us_states(c, conn, src_id):
             break
         dt += datetime.timedelta(days=1)
 
-    c.execute("SELECT * FROM Cases_per_Region")
-    print(c.fetchall())
-
     print(last_error)
+
+# Global JHU data
+# ONLY SAFE TO CALL FROM init_jhu in this state (otherwise consider that source may be replicated, etc.)
+# First csv: 01-22-2020
+def init_jhu_global(c, conn, src_id):
+    # get country_code
+    us_code = get_country_code("United States", c)    
+    
+    # intentionally selected this csv compared to some of the others to ensure all rows are covered
+    setup_df = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/02-27-2022.csv")
+
+    # change Burma to Myanmar
+    # change Czechia to Czech Republic
+    # if country not in Countries, skip
+    # change Taiwan* to Taiwan
+    # change Korea, South to "Korea, Republic of"
+    # what's up with Namibia?
+

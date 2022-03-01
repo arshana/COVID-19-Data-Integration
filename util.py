@@ -1,6 +1,6 @@
 # Get country code associated with country_name from Countries table.
 def get_country_code(country_name, c):
-  c.execute("SELECT country_code FROM Countries WHERE country_name = '" + country_name + "'")
+  c.execute('SELECT country_code FROM Countries WHERE country_name = "' + country_name + '"')
   result = c.fetchall()
   return result[0][0] if result != [] else None
 
