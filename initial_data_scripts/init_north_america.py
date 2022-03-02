@@ -1,0 +1,1 @@
+# JHU data for US states is handled in init_global.py
