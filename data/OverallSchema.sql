@@ -80,9 +80,9 @@ CREATE TABLE Cases_Per_District(
 
 -- keeps track of vaccinations per Country
 CREATE TABLE Vaccinations_Per_Country(
-    first_vaccination_number BIGINT NOT NULL,
-    second_vaccination_number BIGINT NOT NULL,
-    third_vaccination_number BIGINT NOT NULL,
+    first_vaccination_number BIGINT NULL,
+    second_vaccination_number BIGINT NULL,
+    third_vaccination_number BIGINT NULL,
     country_code VARCHAR(2) ,
     source_id BIGINT NOT NULL,
     FOREIGN KEY (country_code) REFERENCES Countries(country_code),
@@ -91,9 +91,9 @@ CREATE TABLE Vaccinations_Per_Country(
 
 -- keeps track of vaccinations per Region
 CREATE TABLE Vaccinations_Per_Region(
-    first_vaccination_number BIGINT NOT NULL,
-    second_vaccination_number BIGINT NOT NULL,
-    third_vaccination_number BIGINT NOT NULL,
+    first_vaccination_number BIGINT NULL,
+    second_vaccination_number BIGINT NULL,
+    third_vaccination_number BIGINT NULL,
     region_code BIGINT,
     source_id BIGINT NOT NULL,
     FOREIGN KEY (region_code) REFERENCES Regions(region_code),
@@ -102,9 +102,9 @@ CREATE TABLE Vaccinations_Per_Region(
 
 -- keeps track of vaccinations per District
 CREATE TABLE Vaccinations_Per_District(
-    first_vaccination_number BIGINT NOT NULL,
-    second_vaccination_number BIGINT NOT NULL,
-    third_vaccination_number BIGINT NOT NULL,
+    first_vaccination_number BIGINT NULL,
+    second_vaccination_number BIGINT NULL,
+    third_vaccination_number BIGINT NULL,
     district_code BIGINT,
     source_id BIGINT NOT NULL,
     FOREIGN KEY (district_code) REFERENCES Districts(district_code),
@@ -160,10 +160,10 @@ CREATE TABLE Age_Per_Country(
     recovery_number INT NULL,
     hospitalization_number INT NULL,
     death_number INT NULL,
-    case_rate INT NULL,
-    recovery_rate INT NULL,
-    hospitalization_rate INT NULL,
-    death_rate INT NULL,
+    case_rate FLOAT NULL,
+    recovery_rate FLOAT NULL,
+    hospitalization_rate FLOAT NULL,
+    death_rate FLOAT NULL,
     FOREIGN KEY (country_id) REFERENCES Countries(country_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
@@ -178,10 +178,10 @@ CREATE TABLE Age_Per_Region(
     recovery_number INT NULL,
     hospitalization_number INT NULL,
     death_number INT NULL,
-    case_rate INT NULL,
-    recovery_rate INT NULL,
-    hospitalization_rate INT NULL,
-    death_rate INT NULL,
+    case_rate FLOAT NULL,
+    recovery_rate FLOAT NULL,
+    hospitalization_rate FLOAT NULL,
+    death_rate FLOAT NULL,
     FOREIGN KEY (region_id) REFERENCES Regions(region_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
@@ -196,10 +196,10 @@ CREATE TABLE Age_Per_District(
     recovery_number INT NULL,
     hospitalization_number INT NULL,
     death_number INT NULL,
-    case_rate INT NULL,
-    recovery_rate INT NULL,
-    hospitalization_rate INT NULL,
-    death_rate INT NULL,
+    case_rate FLOAT NULL,
+    recovery_rate FLOAT NULL,
+    hospitalization_rate FLOAT NULL,
+    death_rate FLOAT NULL,
     FOREIGN KEY (district_id) REFERENCES Districts(district_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );

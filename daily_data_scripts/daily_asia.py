@@ -23,6 +23,8 @@ def string_to_int(s):
 
 
 def update_korea():
+    conn = sqlite3.connect('prototype_db')
+    c = conn.cursor()
 	korea_code = get_country_code("Korea, Republic of", c)
     korea_src_url = "http://ncov.mohw.go.kr/index.jsp"
     korea_src = get_source_id(korea_src_url, c)
