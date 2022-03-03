@@ -211,5 +211,5 @@ countries.to_sql('Countries',con=conn, if_exists = 'append', index=False)
 
 c.close()
 from initial_data_scripts.init_europe import init_italy, init_ukraine
-from initial_data_scripts.init_asia import init_japan, init_korea
+from initial_data_scripts.init_asia import init_japan, init_korea, init_ina
 from initial_data_scripts.init_global import init_jhu

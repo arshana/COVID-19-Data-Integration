@@ -13,7 +13,7 @@ def get_region_code(country_code, region_name, c):
 # TODO Why does this insist on casting region_code to str?
 # Get district code associated with district_name and region_code from Districts table.
 def get_district_code(region_code, district_name, c):
-  c.execute('SELECT district_code FROM Districts WHERE region_code = "' + str(region_code) + '" AND district_name = "' + district_name + '"')
+  c.execute('SELECT district_code FROM Districts WHERE region_code = ' + str(region_code) + 'AND district_name = "' + district_name + '"')
   result = c.fetchall()
   return result[0][0] if result != [] else None
 
