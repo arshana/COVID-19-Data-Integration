@@ -4,6 +4,7 @@ import pandas as pd
 conn = sqlite3.connect('prototype_db')
 c = conn.cursor()
 
+# TODO Namibia's country code is currently being read as NULL; wait for SQLServer and then debug
 c.execute('''
             CREATE TABLE Countries(
             country_code VARCHAR(2) PRIMARY KEY,
