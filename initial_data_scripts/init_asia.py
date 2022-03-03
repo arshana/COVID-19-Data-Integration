@@ -59,7 +59,7 @@ def init_japan():
     conn.commit()
     
     #get region_code for Japan city
-    c.execute("SELECT region_code, region_name from Regions Where country_code = 'JP' ")
+    c.execute("SELECT region_code, region_name from Regions Where country_code = 'JP'")
     result = c.fetchall()
     japan_region = []
     region_dict = {}
@@ -81,32 +81,41 @@ def init_japan():
         age_group = row
         break
     for index,row in japan_age.iterrows():
-        d = row[0].find("~")
-        date1 = row[0][d + 1:]
         if index >= 1:
-            for i in range(0, len(cities)):
-                if cities[i].find("Unnamed") == -1:
-                    if cities[i] == "ALL":
-                        for j in range(0, 20):
-                            age = age_group[i + j]
-                            case = row[i + j]
-                            sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
-                            c.execute(sql,(date1, japan_code, japan_src1, age, case))
-                    else:
-                        for j in range(0, 20):
-                            age = age_group[i + j]
-                            case = row[i + j]
-                            if pd.isna(case) or case == "*":
-                                case = null
-                            sql = '''INSERT INTO Age_Per_Region (date_collected, region_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
-                            c.execute(sql,(date1, region_dict[cities[i]], japan_src1, age, case))
+            d = row[0].find("~")
+            date1 = datetime.datetime.strptime(row[0][:d], "%Y/%m/%d").date()
+            date2 = datetime.datetime.strptime(row[0][d + 1:], "%Y/%m/%d").date()
+            while date1 != date2 + datetime.timedelta(days=1):
+                for i in range(0, len(cities)):
+                    if cities[i].find("Unnamed") == -1:
+                        if cities[i] == "ALL":
+                            for j in range(0, 20):
+                                age = age_group[i + j]
+                                case = row[i + j]
+                                if pd.isna(case) or case == "*":
+                                    case = null
+                                else:
+                                    case = round(int(row[i + j]) / 7)
+                                sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
+                                c.execute(sql,(date1, japan_code, japan_src1, age, case))
+                        else:
+                            for j in range(0, 20):
+                                age = age_group[i + j]
+                                case = row[i + j]
+                                if pd.isna(case) or case == "*":
+                                    case = null
+                                else:
+                                    case = round(int(row[i + j]) / 7)
+                                sql = '''INSERT INTO Age_Per_Region (date_collected, region_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
+                                c.execute(sql,(date1, region_dict[cities[i]], japan_src1, age, case))
+                date1 =  date1 + datetime.timedelta(days=1)
     conn.commit()
     
     #get Japan vaccianation data(include population data)
     japan_vs = pd.ExcelFile("https://www.kantei.go.jp/jp/content/kenbetsu-vaccination_data2.xlsx")
     sheets = japan_vs.sheet_names
     japan_v = pd.read_excel(japan_vs, sheets[2])
-    
+
     #insert vaccianation data and population data for Japan  
     
     for index, row in japan_v.iterrows():
@@ -117,7 +126,7 @@ def init_japan():
             sql = '''INSERT INTO Vaccinations_Per_Country (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, country_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
             c.execute(sql,(date.today(), rate1, rate2, rate3, japan_code, japan_src2))
             sql = '''INSERT INTO Population_Per_Country (country_code, population_amount, date_collected) VALUES (?, ?, ?)'''
-            c.execute(sql,(japan_code, row[12], date.today()))
+            c.execute(sql,(japan_code, row[len(row) - 1], date.today()))
             break
     conn.commit()
     
@@ -132,7 +141,7 @@ def init_japan():
             sql = '''INSERT INTO Vaccinations_Per_Region (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, region_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
             c.execute(sql,(date.today(), rate1, rate2, rate3, region_dict[city], japan_src2))
             sql = '''INSERT INTO Population_Per_Region (region_code, population_amount, date_collected) VALUES (?, ?, ?)'''
-            c.execute(sql,(region_dict[city], row[12], date.today()))
+            c.execute(sql,(region_dict[city], row[len(row) - 1], date.today()))
     conn.commit()
     c.close()
 

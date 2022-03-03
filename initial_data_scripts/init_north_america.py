@@ -5,7 +5,6 @@ import sys
 import datetime
 from datetime import date
 import requests
-from datetime import datetime   
 
 sys.path.append("..")
 from util import *
@@ -34,8 +33,7 @@ def init_us():
     us_src_v = get_source_id(us_src_v, c)
     
     us_country = pd.read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/rolling-averages/us.csv")
-    #us_state = pd.read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/rolling-averages/us-states.csv")
-    #just use recent data for counties otherwise too large(can change later)
+    us_state = pd.read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/rolling-averages/us-states.csv")
     us_county = pd.read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/rolling-averages/us-counties-recent.csv")
     us_sv = pd.read_csv("https://data.cdc.gov/api/views/rh2h-3yt2/rows.csv")
     
@@ -45,6 +43,7 @@ def init_us():
         c.execute(sql,(us_code, row["date"], us_src, row["deaths"], row["cases"]))
     conn.commit()
     
+    county_dict = {}
     region_dict = {}
     #get state code for US
     c.execute("SELECT region_code, region_name from Regions Where country_code = 'US'")
@@ -52,9 +51,10 @@ def init_us():
 
     for i in range(0,len(result)):
         region_dict[result[i][1]] = result[i][0]
-    
+        county_dict[result[i][1]] = {}
     #insert county code and data
-    county_dict = {}
+  
+    
     for index, row in us_county.iterrows():
         state = row["state"]
         county = row["county"]
@@ -62,13 +62,15 @@ def init_us():
             sql = '''INSERT INTO Regions (region_name, country_code) VALUES (?, ?)'''
             c.execute(sql,(state, us_code))
             region_dict[state] = get_region_code(us_code, state, c)
-        if county not in county_dict:
+            county_dict[state] = {}
+        if county not in county_dict[state]:
             sql = '''INSERT INTO Districts (district_name, region_code) VALUES (?, ?)'''
             c.execute(sql,(county, region_dict[state]))
-            county_dict[county] = get_district_code(region_dict[state], county, c)
+            county_dict[state][county] = get_district_code(region_dict[state], county, c)
         sql = '''INSERT INTO Cases_Per_District (district_code, date_collected, source_id, death_numbers, case_numbers) VALUES (?, ?, ?, ?, ?)'''
-        c.execute(sql,(county_dict[county], row["date"], us_src, row["deaths"], row["cases"]))
+        c.execute(sql,(county_dict[state][county], row["date"], us_src, row["deaths"], row["cases"]))
     conn.commit()
+    print(county_dict)
     
     #get and insert population data
     abb = {}
@@ -90,7 +92,7 @@ def init_us():
                 c.execute(sql,(state, us_code))
                 region_dict[state] = get_region_code(us_code, state, c)
             sql = '''INSERT INTO Population_Per_Region (region_code, population_amount, date_collected) VALUES (?, ?, ?)'''
-            c.execute(sql,(region_dict[state], row[5], datetime(2020, 4, 1).date()))
+            c.execute(sql,(region_dict[state], row[5], datetime.datetime(2020, 4, 1).date()))
     sql = '''INSERT INTO Regions (region_name, country_code) VALUES (?, ?)'''
     c.execute(sql,("Palau", us_code))
     region_dict["Palau"] = get_region_code(us_code, "Palau", c)
@@ -106,7 +108,7 @@ def init_us():
     conn.commit()
     
     sql = '''INSERT INTO Population_Per_Country (country_code, population_amount, date_collected) VALUES (?, ?, ?)'''
-    c.execute(sql,(us_code, 334735155, datetime(2020, 4, 1).date()))   
+    c.execute(sql,(us_code, 334735155, datetime.datetime(2020, 4, 1).date()))   
     conn.commit()
     
     #insert vaccination data for country and state

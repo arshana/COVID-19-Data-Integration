@@ -4,7 +4,6 @@ import sys
 import datetime
 import requests
 from datetime import date
-from datetime import datetime 
 
 sys.path.append("..")
 from util import *
@@ -32,7 +31,6 @@ def update_us():
     
     us_country = pd.read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/rolling-averages/us.csv")
     #us_state = pd.read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/rolling-averages/us-states.csv")
-    #just use recent data for counties otherwise too large(can change later)
     us_county = pd.read_csv("https://raw.githubusercontent.com/nytimes/covid-19-data/master/rolling-averages/us-counties-recent.csv")
     us_sv = pd.read_csv("https://data.cdc.gov/api/views/rh2h-3yt2/rows.csv")
     
@@ -58,15 +56,14 @@ def update_us():
         region_dict[result[i][1]] = result[i][0]
     
     #insert county code and data
-    county_dict = {}
+    
     us_county = us_county[::-1]
     for index, row in us_county.iterrows():
         state = row["state"]
         county = row["county"]
-        print(region_dict[state], county)
         county_code = get_district_code(region_dict[state], county, c)
         date1 = row['date']
-        c.execute('SELECT * FROM Cases_Per_District WHERE district_code' + str(county_code) + 'AND date_collected ="' + str(date1)+ '"')
+        c.execute('SELECT * FROM Cases_Per_District WHERE district_code=' + str(county_code) + ' AND date_collected ="' + str(date1)+ '"')
         result = c.fetchall()
         if len(result) == 0:
             sql = '''INSERT INTO Cases_Per_District (district_code, date_collected, source_id, death_numbers, case_numbers) VALUES (?, ?, ?, ?, ?)'''

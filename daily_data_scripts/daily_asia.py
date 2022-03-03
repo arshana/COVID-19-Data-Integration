@@ -196,28 +196,39 @@ def update_japan():
         age_group = row
         break
     japan_age = japan_age[::-1]
+    japan_age.head(20)
     for index,row in japan_age.iterrows():
         d = row[0].find("~")
-        date1 = row[0][d + 1:]
+        date1 = datetime.datetime.strptime(row[0][d + 1:], "%Y/%m/%d").date()
         c.execute('SELECT * FROM Age_Per_Country WHERE country_id ="' + japan_code + '" AND date_collected ="' + str(date1)+ '"')
         result = c.fetchall()
         if len(result) == 0:
-            for i in range(0, len(cities)):
-                if cities[i].find("Unnamed") == -1:
-                    if cities[i] == "ALL":
-                        for j in range(0, 20):
-                            age = age_group[i + j]
-                            case = row[i + j]
-                            sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
-                            c.execute(sql,(date1, japan_code, japan_src1, age, case))
-                    else:
-                        for j in range(0, 20):
-                            age = age_group[i + j]
-                            case = row[i + j]
-                            if pd.isna(case) or case == "*":
-                                case = null
-                            sql = '''INSERT INTO Age_Per_Region (date_collected, region_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
-                            c.execute(sql,(date1, region_dict[cities[i]], japan_src1, age, case))
+            date1 = datetime.datetime.strptime(row[0][:d], "%Y/%m/%d").date()
+            date2 = datetime.datetime.strptime(row[0][d + 1:], "%Y/%m/%d").date()
+            while date1 != date2 + datetime.timedelta(days=1):
+                for i in range(0, len(cities)):
+                    if cities[i].find("Unnamed") == -1:
+                        if cities[i] == "ALL":
+                            for j in range(0, 20):
+                                age = age_group[i + j]
+                                case = row[i + j]
+                                if pd.isna(case) or case == "*":
+                                    case = null
+                                else:
+                                    case = round(int(row[i + j]) / 7)
+                                sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
+                                c.execute(sql,(date1, japan_code, japan_src1, age, case))
+                        else:
+                            for j in range(0, 20):
+                                age = age_group[i + j]
+                                case = row[i + j]
+                                if pd.isna(case) or case == "*":
+                                    case = null
+                                else:
+                                    case = round(int(row[i + j]) / 7)
+                                sql = '''INSERT INTO Age_Per_Region (date_collected, region_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
+                                c.execute(sql,(date1, region_dict[cities[i]], japan_src1, age, case))
+                date1 =  date1 + datetime.timedelta(days=1)
         else:
             break
     conn.commit()
