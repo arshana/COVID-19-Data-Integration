@@ -3,6 +3,7 @@ import sqlite3
 import sys
 import datetime
 from datetime import date
+import requests
 
 sys.path.append("..")
 
@@ -58,7 +59,7 @@ def init_japan():
     conn.commit()
     
     #get region_code for Japan city
-    c.execute("SELECT region_code, region_name from Regions")
+    c.execute("SELECT region_code, region_name from Regions Where country_code = 'JP' ")
     result = c.fetchall()
     japan_region = []
     region_dict = {}
@@ -141,7 +142,7 @@ def init_korea():
     c = conn.cursor()
 
     # get country_code for Korea
-    korea_code = get_country_code("Korea, Republic of", c)
+    korea_code = get_country_code("South Korea", c)
 
     #insert and get source id for Japan data
     korea_src_url = "http://ncov.mohw.go.kr/index.jsp"
@@ -278,5 +279,105 @@ def init_korea():
         c.execute(sql,(city_code, p[city], datetime.datetime(2020, 11, 1).date()))
         sql = '''INSERT INTO Vaccinations_Per_Region (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, region_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
         c.execute(sql,(date.today(), v[city][0], v[city][1], v[city][2], city_code, korea_src))
+    conn.commit()
+    conn.close()
+
+def init_ina():
+    conn = sqlite3.connect('prototype_db')
+    c = conn.cursor()
+    
+    # get country_code for Indonesia
+    ina_code = get_country_code("Indonesia", c)
+    
+    #insert and get source id for Indonesia data
+    ina_src_url = "https://github.com/erlange/INACOVID"
+    set_source(ina_src_url, c, conn)
+    ina_src = get_source_id(ina_src_url, c)
+    
+    #get data
+    ina_case = pd.read_csv("https://raw.githubusercontent.com/erlange/INACOVID/master/data/csv/ext.natl.csv")
+    ina_city = pd.read_csv("https://raw.githubusercontent.com/erlange/INACOVID/master/data/csv/ext.prov.csv")
+    ina_age_nation = pd.read_csv("https://raw.githubusercontent.com/erlange/INACOVID/master/data/csv/cat.natl.csv")
+    ina_age_city = pd.read_csv("https://raw.githubusercontent.com/erlange/INACOVID/master/data/csv/cat.prov.csv")
+    ina_v = pd.read_csv("https://raw.githubusercontent.com/erlange/INACOVID/master/data/csv/vax.csv")
+    
+    #insert data for Indonesia cases
+    for index, row in ina_case.iterrows():
+        sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers, hospitalization_numbers) VALUES (?, ?, ?, ?, ?, ?, ?)'''
+        c.execute(sql,(ina_code, row["Date"], ina_src, row["jumlah_meninggal"], row["jumlah_positif"], row["jumlah_sembuh"], row["jumlah_dirawat"]))
+    conn.commit()
+    
+    #insert regions for Indonesia
+    region_dict = {}
+    for index, row in ina_city.iterrows():
+        if row["Location"] not in region_dict:
+            sql = '''INSERT INTO Regions (region_name, country_code) VALUES (?, ?)'''
+            c.execute(sql,(row["Location"], ina_code))
+            region_dict[row["Location"]] = get_region_code(ina_code, row["Location"], c)
+    conn.commit()
+    
+    #insert region data for Indonesia
+    for index, row in ina_city.iterrows():
+        sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers, hospitalization_numbers) VALUES (?, ?, ?, ?, ?, ?, ?)'''
+        c.execute(sql,(region_dict[row["Location"]], row["Date"], ina_src, row["MENINGGAL"], row["KASUS"], row["SEMBUH"], row["DIRAWAT_OR_ISOLASI"]))
+    conn.commit()
+    
+    #insert country,region age data
+    date1 = ina_age_nation["Date"][0]
+    c.execute('SELECT * FROM Cases_Per_Country WHERE country_code ="' + ina_code + '" AND date_collected ="' + str(date1)+ '"')
+    result = c.fetchall()
+    for index, row in ina_age_nation.iterrows():
+        if row["Category"] == "kelompok_umur":
+            case = round(row["kasus"] * result[0][4] / 100)
+            recovery = round(row["sembuh"] * result[0][5] / 100)
+            hos = round(row["perawatan"] * result[0][6] / 100)
+            death = round(row["meninggal"] * result[0][3] / 100)
+            sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number, recovery_number, hospitalization_number, death_number) VALUES (?, ?, ?, ?, ?, ?, ? ,?)'''
+            c.execute(sql,(row["Date"], ina_code,  ina_src, row["SubCategory"], case, recovery, hos, death))
+    conn.commit()  
+    
+    date1 = ina_age_city["Date"][0]
+    region_data = {}
+    for city in region_dict:
+        c.execute('SELECT * FROM Cases_Per_Region WHERE region_code =' + str(region_dict[city]) + ' AND date_collected ="' + str(date1)+ '"')
+        result = c.fetchall()
+        region_data[city] = (result[0][3], result[0][4], result[0][5], result[0][6])
+        
+    for index, row in ina_age_city.iterrows():
+        if row["Category"] == "kelompok_umur":
+            result = region_data[row["Location"]]
+            case = round(row["kasus"] * result[1] / 100)
+            recovery = round(row["sembuh"] * result[2] / 100)
+            hos = round(row["perawatan"] * result[3] / 100)
+            death = round(row["meninggal"] * result[0] / 100)
+            sql = '''INSERT INTO Age_Per_Region (date_collected, region_id, source_id, age_group, case_number, recovery_number, hospitalization_number, death_number) VALUES (?, ?, ?, ?, ?, ?, ? ,?)'''
+            c.execute(sql,(row["Date"], region_dict[row["Location"]],  ina_src, row["SubCategory"], case, recovery, hos, death))
+    conn.commit()
+    
+    #inser vaccianation data for the country
+    for index, row in ina_v.iterrows():
+        sql = '''INSERT INTO Vaccinations_Per_Country (date_collected, first_vaccination_number, second_vaccination_number, country_code, source_id) VALUES (?, ?, ?, ?, ?)'''
+        c.execute(sql,(row["Date"], row["jumlah_jumlah_vaksinasi_1_kum"], row["jumlah_jumlah_vaksinasi_2_kum"], ina_code, ina_src))
+    conn.commit() 
+    
+    #get and insert population data
+    wikiurl="https://en.wikipedia.org/wiki/Provinces_of_Indonesia#cite_note-5"
+    table_class="wikitable sortable jquery-tablesorter"
+    response=requests.get(wikiurl)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    table = soup.find('table',{'class':"wikitable"})
+    ina_p = pd.read_html(str(table))
+    ina_p = pd.DataFrame(ina_p[0])
+    sql = '''INSERT INTO Population_Per_Country (country_code, population_amount, date_collected) VALUES (?, ?, ?)'''
+    c.execute(sql,(ina_code, 276361783, datetime.datetime(2021, 1, 1).date()))
+    conn.commit()
+    
+    for index, row in ina_p.iterrows():
+        city = row["Indonesian name"].upper()
+        if city == "DAERAH KHUSUS IBUKOTA JAKARTA":
+            city = "DKI JAKARTA"
+        city = city.replace("SUMATRA", "SUMATERA")
+        sql = '''INSERT INTO Population_Per_Region (region_code, population_amount, date_collected) VALUES (?, ?, ?)'''
+        c.execute(sql,(region_dict[city], row["Population (2020 Census)[5]"], datetime.datetime(2020, 1, 1).date()))
     conn.commit()
     conn.close()

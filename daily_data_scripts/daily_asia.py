@@ -3,6 +3,7 @@ import sqlite3
 import sys
 import datetime
 from datetime import date
+import requests
 
 sys.path.append("..")
 from util import *
@@ -25,7 +26,8 @@ def string_to_int(s):
 def update_korea():
     conn = sqlite3.connect('prototype_db')
     c = conn.cursor()
-	korea_code = get_country_code("Korea, Republic of", c)
+    
+    korea_code = get_country_code("South Korea", c)
     korea_src_url = "http://ncov.mohw.go.kr/index.jsp"
     korea_src = get_source_id(korea_src_url, c)
     url = "http://ncov.mohw.go.kr/"
@@ -61,37 +63,41 @@ def update_korea():
                 city_code = get_region_code(korea_code, city, c)
                 index_region[i] = (city, city_code)
                 region_dict[city] = city_code
-
+    
+    korea = korea[::-1]
     #insert data for korea and region of it
     for index, row in korea.iterrows():
-        if index >= 11:
-            date1 = row[0].date()
-            c.execute('SELECT * FROM Cases_Per_Country WHERE country_code ="' + korea_code + '" AND date_collected ="' + str(date1)+ '"')
-            result = c.fetchall()
-            if len(result) == 0:
-                cases = row[1]
-                death =  row["Unnamed: 4_y"]
-                sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers) VALUES (?, ?, ?, ?, ?)'''
-                c.execute(sql,(korea_code, date1, korea_src, death, cases))
-                sql = '''INSERT INTO Cases_Per_Region(region_code, date_collected, source_id, case_numbers) VALUES (?, ?, ?, ?)'''
-                for i in range(2, 18):
-                    city = index_region[i][0]
-                    city_code = index_region[i][1]
-                    c.execute(sql,(city_code, date1, korea_src, row[i]))
+        date1 = row[0].date()
+        c.execute('SELECT * FROM Cases_Per_Country WHERE country_code ="' + korea_code + '" AND date_collected ="' + str(date1)+ '"')
+        result = c.fetchall()
+        if len(result) == 0:
+            cases = row[1]
+            death =  row["Unnamed: 4_y"]
+            sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers) VALUES (?, ?, ?, ?, ?)'''
+            c.execute(sql,(korea_code, date1, korea_src, death, cases))
+            sql = '''INSERT INTO Cases_Per_Region(region_code, date_collected, source_id, case_numbers) VALUES (?, ?, ?, ?)'''
+            for i in range(2, 18):
+                city = index_region[i][0]
+                city_code = index_region[i][1]
+                c.execute(sql,(city_code, date1, korea_src, row[i]))
+        else:
+            break
     conn.commit()
     
     #insert data for korea age
+    korea_age = korea_age[::-1]
     age_group = ["0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70-79", "over 80"]
     for index, row in korea_age.iterrows():
-        if index >= 5:
-            date1 = row[0].date()
-            c.execute('SELECT * FROM Age_Per_Country WHERE country_id ="' + korea_code + '" AND date_collected ="' + str(date1)+ '"')
-            result = c.fetchall()
-            if len(result) == 0:
-                for i in range(0, 9):
-                    case = row[i + 2]
-                    sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
-                    c.execute(sql,(date1, korea_code, korea_src,age_group[i], case))
+        date1 = row[0].date()
+        c.execute('SELECT * FROM Age_Per_Country WHERE country_id ="' + korea_code + '" AND date_collected ="' + str(date1)+ '"')
+        result = c.fetchall()
+        if len(result) == 0:
+            for i in range(0, 9):
+                case = row[i + 2]
+                sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
+                c.execute(sql,(date1, korea_code, korea_src,age_group[i], case))
+        else:
+            break
     conn.commit()
     
     #get vaccination number data for korea
@@ -137,7 +143,7 @@ def update_korea():
             c.execute(sql,(date.today(), v[city][0], v[city][1], v[city][2], city_code, korea_src))
         conn.commit()
     conn.close()
-
+    
 def update_japan():
     conn = sqlite3.connect('prototype_db')
     c = conn.cursor()
@@ -158,7 +164,7 @@ def update_japan():
     japan_all = pd.merge(japan, japan_death, on=["Date"])
     
     #get region_code for Japan city
-    c.execute("SELECT region_code, region_name from Regions")
+    c.execute("SELECT region_code, region_name from Regions Where country_code = 'JP'")
     result = c.fetchall()
     japan_region = []
     region_dict = {}
@@ -168,6 +174,7 @@ def update_japan():
     
     
     #insert region daily case data
+    japan_all = japan_all[::-1]
     for index, row in japan_all.iterrows():
         date1 = row['Date']
         c.execute('SELECT * FROM Cases_Per_Country WHERE country_code ="' + japan_code + '" AND date_collected ="' + str(date1)+ '"')
@@ -178,6 +185,8 @@ def update_japan():
             sql = '''INSERT INTO Cases_Per_Region(region_code, date_collected, source_id, death_numbers, case_numbers) VALUES (?, ?, ?, ?, ?)'''
             for city in japan_region:
                 c.execute(sql,(city[0], row['Date'], japan_src1, row[city[2]], row[city[1]]))
+        else:
+            break
     conn.commit()
     
     #insert country,region age data
@@ -186,29 +195,31 @@ def update_japan():
     for index,row in japan_age.iterrows():
         age_group = row
         break
+    japan_age = japan_age[::-1]
     for index,row in japan_age.iterrows():
         d = row[0].find("~")
         date1 = row[0][d + 1:]
-        if index >= 1:
-            c.execute('SELECT * FROM Age_Per_Country WHERE country_id ="' + japan_code + '" AND date_collected ="' + str(date1)+ '"')
-            result = c.fetchall()
-            if len(result) == 0:
-                for i in range(0, len(cities)):
-                    if cities[i].find("Unnamed") == -1:
-                        if cities[i] == "ALL":
-                            for j in range(0, 20):
-                                age = age_group[i + j]
-                                case = row[i + j]
-                                sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
-                                c.execute(sql,(date1, japan_code, japan_src1, age, case))
-                        else:
-                            for j in range(0, 20):
-                                age = age_group[i + j]
-                                case = row[i + j]
-                                if pd.isna(case) or case == "*":
-                                    case = null
-                                sql = '''INSERT INTO Age_Per_Region (date_collected, region_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
-                                c.execute(sql,(date1, region_dict[cities[i]], japan_src1, age, case))
+        c.execute('SELECT * FROM Age_Per_Country WHERE country_id ="' + japan_code + '" AND date_collected ="' + str(date1)+ '"')
+        result = c.fetchall()
+        if len(result) == 0:
+            for i in range(0, len(cities)):
+                if cities[i].find("Unnamed") == -1:
+                    if cities[i] == "ALL":
+                        for j in range(0, 20):
+                            age = age_group[i + j]
+                            case = row[i + j]
+                            sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
+                            c.execute(sql,(date1, japan_code, japan_src1, age, case))
+                    else:
+                        for j in range(0, 20):
+                            age = age_group[i + j]
+                            case = row[i + j]
+                            if pd.isna(case) or case == "*":
+                                case = null
+                            sql = '''INSERT INTO Age_Per_Region (date_collected, region_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
+                            c.execute(sql,(date1, region_dict[cities[i]], japan_src1, age, case))
+        else:
+            break
     conn.commit()
     
     #update vaccianation data
@@ -242,3 +253,105 @@ def update_japan():
                 c.execute(sql,(date.today(), rate1, rate2, rate3, region_dict[city], japan_src2))
     conn.commit()
     c.close()
+
+def ina():
+    conn = sqlite3.connect('prototype_db')
+    c = conn.cursor()
+    
+    # get country_code for Indonesia
+    ina_code = get_country_code("Indonesia", c)
+    
+    #insert and get source id for Indonesia data
+    ina_src_url = "https://github.com/erlange/INACOVID"
+    ina_src = get_source_id(ina_src_url, c)
+    
+    #get data
+    ina_case = pd.read_csv("https://raw.githubusercontent.com/erlange/INACOVID/master/data/csv/ext.natl.csv")
+    ina_city = pd.read_csv("https://raw.githubusercontent.com/erlange/INACOVID/master/data/csv/ext.prov.csv")
+    ina_age_nation = pd.read_csv("https://raw.githubusercontent.com/erlange/INACOVID/master/data/csv/cat.natl.csv")
+    ina_age_city = pd.read_csv("https://raw.githubusercontent.com/erlange/INACOVID/master/data/csv/cat.prov.csv")
+    ina_v = pd.read_csv("https://raw.githubusercontent.com/erlange/INACOVID/master/data/csv/vax.csv")
+    
+    #insert data for Indonesia cases
+    ina_case = ina_case[::-1]
+    for index, row in ina_case.iterrows():
+        date1 = row['Date']
+        c.execute('SELECT * FROM Cases_Per_Country WHERE country_code ="' + ina_code + '" AND date_collected ="' + str(date1)+ '"')
+        result = c.fetchall()
+        if len(result) == 0:
+            sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers, hospitalization_numbers) VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            c.execute(sql,(ina_code, row["Date"], ina_src, row["jumlah_meninggal"], row["jumlah_positif"], row["jumlah_sembuh"], row["jumlah_dirawat"]))
+        else:
+            break
+    conn.commit()
+    
+    #get region_code for Indonesia
+    region_dict = {}
+    for index, row in ina_city.iterrows():
+        if row["Location"] not in region_dict:
+            region_dict[row["Location"]] = get_region_code(ina_code, row["Location"], c)
+    conn.commit()
+    
+    ina_city = ina_city[::-1]
+    #insert region data for Indonesia
+    for index, row in ina_city.iterrows():
+        date1 = row['Date']
+        c.execute('SELECT * FROM Cases_Per_Region WHERE region_code =' + str(region_dict[row["Location"]]) + ' AND date_collected ="' + str(date1)+ '"')
+        result = c.fetchall()
+        if len(result) == 0:
+            sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers, hospitalization_numbers) VALUES (?, ?, ?, ?, ?, ?, ?)'''
+            c.execute(sql,(region_dict[row["Location"]], row["Date"], ina_src, row["MENINGGAL"], row["KASUS"], row["SEMBUH"], row["DIRAWAT_OR_ISOLASI"]))
+        else:
+            break
+    conn.commit()
+    
+    #insert country,region age data
+    date1 = ina_age_nation["Date"][0]
+    c.execute('SELECT * FROM Age_Per_Country WHERE country_id ="' + ina_code + '" AND date_collected ="' + str(date1)+ '"')
+    result = c.fetchall()
+    if len(result) == 0:
+        c.execute('SELECT * FROM Cases_Per_Country WHERE country_code ="' + ina_code + '" AND date_collected ="' + str(date1)+ '"')
+        result = c.fetchall()
+        for index, row in ina_age_nation.iterrows():
+            if row["Category"] == "kelompok_umur":
+                case = round(row["kasus"] * result[0][4] / 100)
+                recovery = round(row["sembuh"] * result[0][5] / 100)
+                hos = round(row["perawatan"] * result[0][6] / 100)
+                death = round(row["meninggal"] * result[0][3] / 100)
+                sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number, recovery_number, hospitalization_number, death_number) VALUES (?, ?, ?, ?, ?, ?, ? ,?)'''
+                c.execute(sql,(row["Date"], ina_code,  ina_src, row["SubCategory"], case, recovery, hos, death))
+        conn.commit()  
+    
+    date1 = ina_age_city["Date"][0]
+    c.execute('SELECT * FROM Age_Per_Region WHERE source_id =' + str(ina_src) + ' AND date_collected ="' + str(date1)+ '"')
+    result = c.fetchall()
+    if len(result) == 0:
+        region_data = {}
+        for city in region_dict:
+            c.execute('SELECT * FROM Cases_Per_Region WHERE region_code =' + str(region_dict[city]) + ' AND date_collected ="' + str(date1)+ '"')
+            result = c.fetchall()
+            region_data[city] = (result[0][3], result[0][4], result[0][5], result[0][6])
+        
+        for index, row in ina_age_city.iterrows():
+            if row["Category"] == "kelompok_umur":
+                result = region_data[row["Location"]]
+                case = round(row["kasus"] * result[1] / 100)
+                recovery = round(row["sembuh"] * result[2] / 100)
+                hos = round(row["perawatan"] * result[3] / 100)
+                death = round(row["meninggal"] * result[0] / 100)
+                sql = '''INSERT INTO Age_Per_Region (date_collected, region_id, source_id, age_group, case_number, recovery_number, hospitalization_number, death_number) VALUES (?, ?, ?, ?, ?, ?, ? ,?)'''
+                c.execute(sql,(row["Date"], region_dict[row["Location"]],  ina_src, row["SubCategory"], case, recovery, hos, death))
+        conn.commit()
+    
+    #inser vaccianation data for the country
+    ina_v = ina_v[::-1]
+    for index, row in ina_v.iterrows():
+        date1 = row['Date']
+        c.execute('SELECT * FROM Vaccinations_Per_Country WHERE country_code ="' + ina_code + '" AND date_collected ="' + str(date1)+ '"')
+        result = c.fetchall()
+        if len(result) == 0:
+            sql = '''INSERT INTO Vaccinations_Per_Country (date_collected, first_vaccination_number, second_vaccination_number, country_code, source_id) VALUES (?, ?, ?, ?, ?)'''
+            c.execute(sql,(row["Date"], row["jumlah_jumlah_vaksinasi_1_kum"], row["jumlah_jumlah_vaksinasi_2_kum"], ina_code, ina_src))
+        else:
+            break
+    conn.commit() 
