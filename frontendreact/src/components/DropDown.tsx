@@ -4,6 +4,7 @@ interface DropDownProp {
     geoOption: string;
     name: string;
     code: string;
+    changeFunction(event: React.ChangeEvent<HTMLSelectElement>):void;
 }
 
 
@@ -18,7 +19,8 @@ export default function DropDown(props: DropDownProp) {
     }, [props.geoOption]);
     console.log(options);
     return (
-        <select> {options.map((optionItem:any) =><option key={optionItem[props.code]}
+        <select onChange={props.changeFunction}
+        > {options.map((optionItem:any) =><option key={optionItem[props.code]}
          value={optionItem[props.name]}>{optionItem[props.name] + " (" + optionItem[props.code] + ")"}</option>)} </select>
     );
 }
