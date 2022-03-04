@@ -96,7 +96,7 @@ def init_japan():
                                     case = null
                                 else:
                                     case = round(int(row[i + j]) / 7)
-                                sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
+                                sql = '''INSERT INTO Age_Per_Country (date_collected, country_code, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
                                 c.execute(sql,(date1, japan_code, japan_src1, age, case))
                         else:
                             for j in range(0, 20):
@@ -106,7 +106,7 @@ def init_japan():
                                     case = null
                                 else:
                                     case = round(int(row[i + j]) / 7)
-                                sql = '''INSERT INTO Age_Per_Region (date_collected, region_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
+                                sql = '''INSERT INTO Age_Per_Region (date_collected, region_code, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
                                 c.execute(sql,(date1, region_dict[cities[i]], japan_src1, age, case))
                 date1 =  date1 + datetime.timedelta(days=1)
     conn.commit()
@@ -218,7 +218,7 @@ def init_korea():
             date1 = row[0].date()
             for i in range(0, 9):
                 case = row[i + 2]
-                sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
+                sql = '''INSERT INTO Age_Per_Country (date_collected, country_code, source_id, age_group, case_number) VALUES (?, ?, ?, ?, ?)'''
                 c.execute(sql,(date1, korea_code, korea_src,age_group[i], case))
     conn.commit()
     
@@ -341,7 +341,7 @@ def init_ina():
             recovery = round(row["sembuh"] * result[0][5] / 100)
             hos = round(row["perawatan"] * result[0][6] / 100)
             death = round(row["meninggal"] * result[0][3] / 100)
-            sql = '''INSERT INTO Age_Per_Country (date_collected, country_id, source_id, age_group, case_number, recovery_number, hospitalization_number, death_number) VALUES (?, ?, ?, ?, ?, ?, ? ,?)'''
+            sql = '''INSERT INTO Age_Per_Country (date_collected, country_code, source_id, age_group, case_number, recovery_number, hospitalization_number, death_number) VALUES (?, ?, ?, ?, ?, ?, ? ,?)'''
             c.execute(sql,(row["Date"], ina_code,  ina_src, row["SubCategory"], case, recovery, hos, death))
     conn.commit()  
     
@@ -359,7 +359,7 @@ def init_ina():
             recovery = round(row["sembuh"] * result[2] / 100)
             hos = round(row["perawatan"] * result[3] / 100)
             death = round(row["meninggal"] * result[0] / 100)
-            sql = '''INSERT INTO Age_Per_Region (date_collected, region_id, source_id, age_group, case_number, recovery_number, hospitalization_number, death_number) VALUES (?, ?, ?, ?, ?, ?, ? ,?)'''
+            sql = '''INSERT INTO Age_Per_Region (date_collected, region_code, source_id, age_group, case_number, recovery_number, hospitalization_number, death_number) VALUES (?, ?, ?, ?, ?, ?, ? ,?)'''
             c.execute(sql,(row["Date"], region_dict[row["Location"]],  ina_src, row["SubCategory"], case, recovery, hos, death))
     conn.commit()
     
