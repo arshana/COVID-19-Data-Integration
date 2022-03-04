@@ -24,7 +24,7 @@ def daily_italy():
                 prev_row = json.loads(line)
             elif i == 1:
                 prev_death_dict = json.loads(line)
-            if i == 2:
+            elif i == 2:
                 prev_recovered_dict = json.loads(line)
             i += 1
         f.close()
@@ -40,7 +40,7 @@ def daily_italy():
     italy_src = get_source_id(italy_src_url, c)
     
     # insert total
-    dt = datetime.datetime.today()
+    dt = datetime.datetime.today() - datetime.timedelta(days=2)
     for i in range(0, 3):
         date = get_italy_date(dt)
         sql = '''SELECT date_collected FROM Cases_Per_Country WHERE date_collected = ? AND source_id = ?'''
@@ -59,10 +59,10 @@ def daily_italy():
                 if row.recovered is not "NaN":
                     prev_row["recovered"] = row.recovered
             conn.commit()
-        dt -= datetime.timedelta(days=1)
+        dt += datetime.timedelta(days=1)
     
     # set up + insert regions
-    dt = datetime.datetime.today()
+    dt = datetime.datetime.today() - datetime.timedelta(days=2)
     for i in range(0, 3):
         date = get_italy_date(dt)
         sql = '''SELECT date_collected FROM Cases_Per_Region WHERE date_collected = ? AND source_id = ?'''
@@ -87,13 +87,13 @@ def daily_italy():
                 if row.recovered is not "NaN":
                     prev_recovered_dict[region_code] = row.recovered
             conn.commit()
-        dt -= datetime.timedelta(days=1)
+        dt += datetime.timedelta(days=1)
 
-    dt = datetime.datetime.today()
+    dt = datetime.datetime.today() - datetime.timedelta(days=2)
     italy_district_helper(get_italy_date(dt), italy_code, italy_src, df_subregion, c, conn)
 
     for i in range(0, 2):
-        dt -= datetime.timedelta(days=1)
+        dt += datetime.timedelta(days=1)
         italy_district_helper(get_italy_date(dt), italy_code, italy_src, df_subregion, c, conn)
             
     conn.close()
