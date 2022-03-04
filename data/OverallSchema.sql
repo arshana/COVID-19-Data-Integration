@@ -153,7 +153,7 @@ CREATE TABLE Strains_Per_District(
 -- age related data on covid per country
 CREATE TABLE Age_Per_Country(
     date_collected DATETIME2 NOT NULL,
-    country_id VARCHAR(2),
+    country_code VARCHAR(2),
     source_id BIGINT NOT NULL,
     age_group VARCHAR(64) NOT NULL,
     case_number INT NULL,
@@ -171,7 +171,7 @@ CREATE TABLE Age_Per_Country(
 -- age related data on covid per region
 CREATE TABLE Age_Per_Region(
     date_collected DATETIME2 NOT NULL,
-    region_id BIGINT,
+    region_code BIGINT,
     source_id BIGINT NOT NULL,
     age_group VARCHAR(64) NOT NULL,
     case_number INT NULL,
@@ -189,7 +189,7 @@ CREATE TABLE Age_Per_Region(
 -- age related data on covid per district
 CREATE TABLE Age_Per_District(
     date_collected DATETIME2 NOT NULL,
-    district_id BIGINT,
+    district_code BIGINT,
     source_id BIGINT NOT NULL,
     age_group VARCHAR(64) NOT NULL,
     case_number INT NULL,

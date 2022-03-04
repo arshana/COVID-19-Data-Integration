@@ -442,7 +442,7 @@ def country_national_age_view(request:HttpRequest):
         return HttpResponseBadRequest("<h1> you need either a country-name or country-code </h1>")
 
 # shows the age information for a given region
-def region_population_view(request:HttpRequest):
+def region_age_view(request:HttpRequest):
     if 'region-code' in request.GET:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Regions, Age_Per_Region" +
@@ -458,7 +458,7 @@ def region_population_view(request:HttpRequest):
          return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
 
 # returns district age information for the given district number
-def district_population_view(request:HttpRequest):
+def district_age_view(request:HttpRequest):
     if 'district-code' in request.GET:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Age_Per_District, Districts" +

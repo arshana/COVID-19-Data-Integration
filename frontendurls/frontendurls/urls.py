@@ -19,7 +19,9 @@ from pages.views import (countries_view, home_view, country_national_view, count
                          region_view, region_districts_view, district_view, country_districts_covid_view,
                          country_regions_covid_view, region_districts_covid_view, region_vaccination_view,
                          sources_view, country_national_vaccination_view, district_vaccination_view,
-                         country_national_strain_view, region_strain_view, district_strain_view)
+                         country_national_strain_view, region_strain_view, district_strain_view,
+                         country_national_population_view, region_population_view, district_population_view,
+                         country_national_age_view, region_age_view, district_age_view)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -39,5 +41,11 @@ urlpatterns = [
     path('district-vaccinations/', district_vaccination_view),
     path('country-national-strains/', country_national_strain_view),
     path('region-strains/', region_strain_view),
-    path('district-strains/', district_strain_view)
+    path('district-strains/', district_strain_view),
+    path('country-national-population/', country_national_population_view),
+    path('region-population/', region_population_view),
+    path('district-population/', district_population_view),
+    path('country-national-age/', country_national_age_view),
+    path('region-age/', region_age_view),
+    path('district-age/', district_age_view),
 ]
