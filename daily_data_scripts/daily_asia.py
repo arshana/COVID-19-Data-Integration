@@ -196,7 +196,6 @@ def update_japan():
         age_group = row
         break
     japan_age = japan_age[::-1]
-    japan_age.head(20)
     for index,row in japan_age.iterrows():
         d = row[0].find("~")
         date1 = datetime.datetime.strptime(row[0][d + 1:], "%Y/%m/%d").date()
