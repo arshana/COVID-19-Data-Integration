@@ -11,14 +11,6 @@ from util import *
 def init_jrc():
     df = pd.read_csv('https://raw.githubusercontent.com/ec-jrc/COVID-19/master/data-by-region/jrc-covid-19-all-days-by-regions.csv', error_bad_lines=False)
 
-# JRC includes Germany data, but not the same subsets
-def init_germany():
-    pass
-
-# JRC includes UK data, but not the same subsets
-def init_uk():
-    pass
-
 # JRC includes Italy data, but not the same subsets
 def init_italy():
     df_total = pd.read_csv('https://raw.githubusercontent.com/RamiKrispin/covid19Italy/master/csv/italy_total.csv', error_bad_lines=False)
@@ -132,6 +124,3 @@ def init_ukraine():
         dt += datetime.timedelta(days=1)
     
     conn.close()
-
-def init_france():
-    pass
