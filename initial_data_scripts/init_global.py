@@ -2,6 +2,7 @@ import pandas as pd
 import sqlite3
 import datetime
 import sys
+import json
 
 from util import *
 
@@ -78,6 +79,13 @@ def init_jhu_us_states(c, conn, src_id):
 
     print(last_error)
 
+    with open('jhu_us.json', 'w') as f:
+        f.write(json.dumps(prev_death_dict)+'\n')
+        f.write(json.dumps(prev_recovered_dict)+'\n')
+        f.write(json.dumps(prev_case_dict)+'\n')
+        f.write(json.dumps(prev_hospitalized_dict)+'\n')
+        f.close()
+
 # Global JHU data
 # ONLY SAFE TO CALL FROM init_jhu in this state (otherwise consider that source may be replicated, etc.)
 # First csv: 01-22-2020
@@ -96,8 +104,7 @@ def init_jhu_global(c, conn, src_id):
     prev_case_dict_subregion = {}
 
     # TODO test again after the Namibia issue from prototype_main_backend is fixed
-    i = 0
-    while (i < 3):
+    while (True):
         date = ('0' if dt.month < 10 else '')  + str(dt.month) + '-' + ('0' if dt.day < 10 else '') + str(dt.day) + '-' + str(dt.year)
         csv_name = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/' + date + '.csv'
         try:
@@ -242,3 +249,11 @@ def init_jhu_global(c, conn, src_id):
 
     # debugging
     #print(missing_countries_set)
+    with open('jhu_global.json', 'w') as f:
+        f.write(json.dumps(prev_death_dict)+'\n')
+        f.write(json.dumps(prev_recovered_dict)+'\n')
+        f.write(json.dumps(prev_case_dict)+'\n')
+        f.write(json.dumps(prev_death_dict_subregion)+'\n')
+        f.write(json.dumps(prev_recovered_dict_subregion)+'\n')
+        f.write(json.dumps(prev_case_dict_subregion)+'\n')
+        f.close()
