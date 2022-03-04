@@ -2,7 +2,7 @@
 -- no nulls
 -- country codes are used in the rest of the tables as keys
 CREATE TABLE Countries(
-    country_code VARCHAR(2) PRIMARY KEY,
+    country_code VARCHAR(3) PRIMARY KEY,
     country_name VARCHAR(128) UNIQUE NOT NULL
 );
 
@@ -11,7 +11,7 @@ CREATE TABLE Countries(
 CREATE TABLE Regions(
     region_code BIGINT IDENTITY(1, 1) PRIMARY KEY,
     region_name VARCHAR(128) NOT NULL,
-    country_code VARCHAR(2) NOT NULL,
+    country_code VARCHAR(3) NOT NULL,
     longitude FLOAT NULL,
     latitude FLOAT NULL,
     FOREIGN KEY (country_code) REFERENCES Countries(country_code)
@@ -39,7 +39,7 @@ CREATE TABLE Sources(
 -- information on cases, recovery numbers, and deaths
 -- per countries
 CREATE TABLE Cases_Per_Country(
-    country_code VARCHAR(2),
+    country_code VARCHAR(3),
     date_collected DATETIME2 NOT NULL,
     source_id BIGINT NOT NULL,
     death_numbers INT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE Vaccinations_Per_Country(
     first_vaccination_number BIGINT NULL,
     second_vaccination_number BIGINT NULL,
     third_vaccination_number BIGINT NULL,
-    country_code VARCHAR(2) ,
+    country_code VARCHAR(3) ,
     source_id BIGINT NOT NULL,
     FOREIGN KEY (country_code) REFERENCES Countries(country_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
@@ -113,7 +113,7 @@ CREATE TABLE Vaccinations_Per_District(
 
 -- keeps track of strain data per country
 CREATE TABLE Strains_Per_Country(
-    country_code VARCHAR(2) PRIMARY KEY,
+    country_code VARCHAR(3) PRIMARY KEY,
     source_id BIGINT NOT NULL,
     alpha_rate INT NULL,
     beta_rate INT NULL,
@@ -153,7 +153,7 @@ CREATE TABLE Strains_Per_District(
 -- age related data on covid per country
 CREATE TABLE Age_Per_Country(
     date_collected DATETIME2 NOT NULL,
-    country_code VARCHAR(2),
+    country_code VARCHAR(3),
     source_id BIGINT NOT NULL,
     age_group VARCHAR(64) NOT NULL,
     case_number INT NULL,
@@ -206,7 +206,7 @@ CREATE TABLE Age_Per_District(
 
 -- population per country on a given date
 CREATE TABLE Population_Per_Country(
-    country_code VARCHAR(2) PRIMARY KEY,
+    country_code VARCHAR(3) PRIMARY KEY,
     population_amount BIGINT NOT NULL,
     date_collected DATETIME2 NOT NULL,
     FOREIGN KEY (country_code) REFERENCES Countries(country_code)

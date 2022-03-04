@@ -7,7 +7,7 @@ c = conn.cursor()
 # TODO Namibia's country code is currently being read as NULL; wait for SQLServer and then debug
 c.execute('''
             CREATE TABLE Countries(
-            country_code VARCHAR(2) PRIMARY KEY,
+            country_code VARCHAR(3) PRIMARY KEY,
             country_name VARCHAR(128) UNIQUE NOT NULL
             )
           ''')
@@ -15,7 +15,7 @@ c.execute('''
             CREATE TABLE Regions(
             region_code INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
             region_name VARCHAR(128) NOT NULL,
-            country_code VARCHAR(2) NOT NULL,
+            country_code VARCHAR(3) NOT NULL,
             longitude FLOAT NULL,
             latitude FLOAT NULL,
             FOREIGN KEY (country_code) REFERENCES Countries(country_code)
@@ -42,7 +42,7 @@ c.execute('''
 
 c.execute('''
             CREATE TABLE Cases_Per_Country(
-                country_code VARCHAR(2) ,
+                country_code VARCHAR(3) ,
                 date_collected DATETIME2 NOT NULL,
                 source_id BIGINT NOT NULL,
                 death_numbers INT NULL,
@@ -88,7 +88,7 @@ c.execute('''
                 first_vaccination_number BIGINT NULL,
                 second_vaccination_number BIGINT NULL,
                 third_vaccination_number BIGINT NULL,
-                country_code VARCHAR(2),
+                country_code VARCHAR(3),
                 source_id BIGINT NOT NULL,
                 FOREIGN KEY (country_code) REFERENCES Countries(country_code),
                 FOREIGN KEY (source_id) REFERENCES Sources(source_id)
@@ -122,7 +122,7 @@ c.execute('''
           ''')
 
 c.execute('''CREATE TABLE Population_Per_Country(
-            country_code VARCHAR(2) PRIMARY KEY,
+            country_code VARCHAR(3) PRIMARY KEY,
             population_amount BIGINT NOT NULL,
             date_collected DATETIME2 NOT NULL,
             FOREIGN KEY (country_code) REFERENCES Countries(country_code)
@@ -147,7 +147,7 @@ c.execute('''CREATE TABLE Population_Per_District(
 
 c.execute('''CREATE TABLE Age_Per_Country(
     date_collected DATETIME2 NOT NULL,
-    country_id VARCHAR(2),
+    country_id VARCHAR(3),
     source_id BIGINT NOT NULL,
     age_group VARCHAR(64) NOT NULL,
     case_number INT NULL,
