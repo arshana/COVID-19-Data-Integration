@@ -5,7 +5,7 @@ import DropDown  from './components/DropDown';
 function App() {
   return (
     <div className="App">
-      <DropDown geoOption='countries'/>
+      <DropDown geoOption='countries' name='country_name' code='country_code'/>
     </div>
   );
 }

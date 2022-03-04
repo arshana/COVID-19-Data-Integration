@@ -1,6 +1,7 @@
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.db import connection
+import json
 
 # Create your views here.
 
@@ -18,7 +19,7 @@ def countries_view(request:HttpRequest):
     results = []
     for row in rows:
         results.append(dict(zip(columns, row)))
-    return HttpResponse(results)
+    return HttpResponse(json.dumps(results))
 
 # returns country covid information nationally given a country name (or a country code)
 def country_national_view(request:HttpRequest):
