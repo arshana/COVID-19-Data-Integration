@@ -164,7 +164,7 @@ CREATE TABLE Age_Per_Country(
     recovery_rate FLOAT NULL,
     hospitalization_rate FLOAT NULL,
     death_rate FLOAT NULL,
-    FOREIGN KEY (country_id) REFERENCES Countries(country_code),
+    FOREIGN KEY (country_code) REFERENCES Countries(country_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
 
@@ -182,7 +182,7 @@ CREATE TABLE Age_Per_Region(
     recovery_rate FLOAT NULL,
     hospitalization_rate FLOAT NULL,
     death_rate FLOAT NULL,
-    FOREIGN KEY (region_id) REFERENCES Regions(region_code),
+    FOREIGN KEY (region_code) REFERENCES Regions(region_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
 
@@ -200,7 +200,7 @@ CREATE TABLE Age_Per_District(
     recovery_rate FLOAT NULL,
     hospitalization_rate FLOAT NULL,
     death_rate FLOAT NULL,
-    FOREIGN KEY (district_id) REFERENCES Districts(district_code),
+    FOREIGN KEY (district_code) REFERENCES Districts(district_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
 
