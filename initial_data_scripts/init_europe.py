@@ -1,7 +1,9 @@
+from matplotlib.pyplot import close
 import pandas as pd
 import sqlite3
 import datetime
 import sys
+import json
 
 sys.path.append("..")
 
@@ -29,31 +31,28 @@ def init_italy():
     italy_src = get_source_id(italy_src_url, c)
 
     # insert total
-    prev_row = None
+    prev_row = {}
     for row in df_total.itertuples():
-        prev_death = 0 if prev_row is None else prev_row.death
-        prev_recovered = 0 if prev_row is None else prev_row.recovered
+        prev_death = 0 if "death" not in prev_row else prev_row["death"]
+        prev_recovered = 0 if "recovered" not in prev_row else prev_row["recovered"]
         sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers, hospitalization_numbers) VALUES (?, ?, ?, ?, ?, ?, ?)'''
         c.execute(sql,(italy_code, row.date, italy_src, row.death - prev_death if row.death is not "NaN" else None, int(row.daily_positive_cases) if row.daily_positive_cases is not "NaN" else None, row.recovered - prev_recovered if row.recovered is not "NaN" else None, int(row.total_hospitalized) if row.total_hospitalized is not "NaN" else None))
-        prev_row = row
+        if row.death is not "NaN":
+            prev_row["death"] = row.death
+        if row.recovered is not "NaN":
+            prev_row["recovered"] = row.recovered
     conn.commit()
-
-    # set up regions
-    src_region_codes = df_region["region_code"].unique()
-    for src_code in src_region_codes:
-        region_rows = df_region.loc[df_region['region_code'] == src_code]
-        region_row = region_rows.iloc[0]
-        if get_region_code(italy_code, region_row.region_name, c) is None:
-            sql = '''INSERT INTO Regions (region_name, country_code, longitude, latitude) VALUES (?, ?, ?, ?)'''
-            c.execute(sql,(region_row.region_name, italy_code, region_row.long, region_row.lat))
-            conn.commit()
     
-    # insert regions
-    region_code = get_region_code(italy_code, region_row.region_name, c)
+    # set up + insert regions
     prev_death_dict = {}
     prev_recovered_dict = {}
     for row in df_region.itertuples():
         region_code = get_region_code(italy_code, row.region_name, c)
+        if region_code is None:
+            sql = '''INSERT INTO Regions (region_name, country_code, longitude, latitude) VALUES (?, ?, ?, ?)'''
+            c.execute(sql,(row.region_name, italy_code, row.long, row.lat))
+            conn.commit()
+            region_code = get_region_code(italy_code, row.region_name, c)
         prev_death = 0 if region_code not in prev_death_dict else prev_death_dict[region_code]
         prev_recovered = 0 if region_code not in prev_recovered_dict else prev_recovered_dict[region_code]
         sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers, hospitalization_numbers) VALUES (?, ?, ?, ?, ?, ?, ?)'''
@@ -70,11 +69,12 @@ def init_italy():
         subregion_rows = df_subregion.loc[df_subregion['province_code'] == src_code]
         subregion_row = subregion_rows.iloc[0]
         region_code = get_region_code(italy_code, subregion_row.region_name, c)
-        if get_district_code(region_code, subregion_row.province_name, c) is None:
+        subregion_code = get_district_code(region_code, subregion_row.province_name, c)
+        if subregion_code is None:
             sql = '''INSERT INTO Districts (district_name, region_code, longitude, latitude) VALUES (?, ?, ?, ?)'''
             c.execute(sql,(subregion_row.province_name, region_code, subregion_row.long, subregion_row.lat))
             conn.commit()
-        subregion_code = get_district_code(region_code, subregion_row.province_name, c)
+            subregion_code = get_district_code(region_code, subregion_row.province_name, c)
         for i in range(len(subregion_rows)):
             row = subregion_rows.iloc[i]
             sql = '''INSERT INTO Cases_Per_District (district_code, date_collected, source_id, case_numbers) VALUES (?, ?, ?, ?)'''
@@ -82,6 +82,13 @@ def init_italy():
         conn.commit()
 
     conn.close()
+
+    with open('italy.json', 'w') as f:
+        f.write(json.dumps(prev_row)+'\n')
+        f.write(json.dumps(prev_death_dict)+'\n')
+        f.write(json.dumps(prev_recovered_dict)+'\n')
+        f.close()
+
 
 # Starts on 03/03/2020.
 def init_ukraine():
