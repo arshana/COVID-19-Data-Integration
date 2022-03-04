@@ -140,7 +140,7 @@ def region_districts_covid_view(request:HttpRequest):
     else:
         return HttpResponseBadRequest("<h1> you need the region-code for this function </h1>")
 
-# returns district information for the given district number
+# returns district covid information for the given district number
 def district_view(request:HttpRequest):
     if 'district-code' in request.GET:
         with connection.cursor() as cursor:
@@ -226,7 +226,7 @@ def country_regions_view(request:HttpRequest):
     else:
          return HttpResponseBadRequest("<h1> you need the country-name or country-code for this function </h1>")
 
-# shows the vacination information for a given district
+# shows the vacination information for a given region
 def region_vaccination_view(request:HttpRequest):
     if 'region-code' in request.GET:
         with connection.cursor() as cursor:
@@ -241,3 +241,234 @@ def region_vaccination_view(request:HttpRequest):
         return HttpResponse(results)
     else:
          return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
+
+# shows the sources for this project
+def sources_view(request:HttpRequest):
+    with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Sources")
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+            results = []
+            for row in rows:
+                results.append(dict(zip(columns, row)))
+            return HttpResponse(results)
+
+# returns country vaccine information nationally given a country name (or a country code)
+def country_national_vaccination_view(request:HttpRequest):
+    if 'country-name' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Vaccinations_Per_Country, " +
+             "Countries WHERE Countries.country_name = %s COLLATE NOCASE"
+              + " AND Countries.country_code = Vaccinations_Per_Country.country_code", [request.GET['country-name']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    elif 'country-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Vaccinations_Per_Country, " +
+             "Countries WHERE Countries.country_code = %s COLLATE NOCASE"
+              + " AND Countries.country_code = Vaccinations_Per_Country.country_code", [request.GET['country-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+        return HttpResponseBadRequest("<h1> you need either a country-name or country-code </h1>")
+
+# returns district vaccine information for the given district number
+def district_vaccination_view(request:HttpRequest):
+    if 'district-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Vaccinations_Per_District, Districts" +
+             " WHERE Districts.district_code = %s COLLATE NOCASE"
+              + " AND Districts.district_code = Vaccinations_Per_District.district_code", [request.GET['district-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+        return HttpResponseBadRequest("<h1> you need the distict-code for this function </h1>")
+
+# returns country strain information nationally given a country name (or a country code)
+def country_national_strain_view(request:HttpRequest):
+    if 'country-name' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Strains_Per_Country, " +
+             "Countries WHERE Countries.country_name = %s COLLATE NOCASE"
+              + " AND Countries.country_code = Strains_Per_Country.country_code", [request.GET['country-name']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    elif 'country-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Strains_Per_Country, " +
+             "Countries WHERE Countries.country_code = %s COLLATE NOCASE"
+              + " AND Countries.country_code = Strains_Per_Country.country_code", [request.GET['country-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+        return HttpResponseBadRequest("<h1> you need either a country-name or country-code </h1>")
+
+# shows the strain information for a given region
+def region_strain_view(request:HttpRequest):
+    if 'region-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Regions, Strains_Per_Region" +
+             " WHERE Regions.region_code = %s COLLATE NOCASE"
+              + " AND Regions.region_code = Strains_Per_Region.region_code", [request.GET['region-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+         return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
+
+# returns district strain information for the given district number
+def district_strain_view(request:HttpRequest):
+    if 'district-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Strains_Per_District, Districts" +
+             " WHERE Districts.district_code = %s COLLATE NOCASE"
+              + " AND Districts.district_code = Strains_Per_District.district_code", [request.GET['district-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+        return HttpResponseBadRequest("<h1> you need the distict-code for this function </h1>")
+
+# returns country population information nationally given a country name (or a country code)
+def country_national_population_view(request:HttpRequest):
+    if 'country-name' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Population_Per_Country, " +
+             "Countries WHERE Countries.country_name = %s COLLATE NOCASE"
+              + " AND Countries.country_code = Population_Per_Country.country_code", [request.GET['country-name']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    elif 'country-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Population_Per_Country, " +
+             "Countries WHERE Countries.country_code = %s COLLATE NOCASE"
+              + " AND Countries.country_code = Population_Per_Country.country_code", [request.GET['country-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+        return HttpResponseBadRequest("<h1> you need either a country-name or country-code </h1>")
+
+# shows the population information for a given region
+def region_population_view(request:HttpRequest):
+    if 'region-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Regions, Population_Per_Region" +
+             " WHERE Regions.region_code = %s COLLATE NOCASE"
+              + " AND Regions.region_code = Population_Per_Region.region_code", [request.GET['region-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+         return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
+
+# returns district population information for the given district number
+def district_population_view(request:HttpRequest):
+    if 'district-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Population_Per_District, Districts" +
+             " WHERE Districts.district_code = %s COLLATE NOCASE"
+              + " AND Districts.district_code = Population_Per_District.district_code", [request.GET['district-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+        return HttpResponseBadRequest("<h1> you need the distict-code for this function </h1>") 
+
+# returns country age information nationally given a country name (or a country code)
+def country_national_age_view(request:HttpRequest):
+    if 'country-name' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Age_Per_Country, " +
+             "Countries WHERE Countries.country_name = %s COLLATE NOCASE"
+              + " AND Countries.country_code = Age_Per_Country.country_code", [request.GET['country-name']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    elif 'country-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Age_Per_Country, " +
+             "Countries WHERE Countries.country_code = %s COLLATE NOCASE"
+              + " AND Countries.country_code = Age_Per_Country.country_code", [request.GET['country-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+        return HttpResponseBadRequest("<h1> you need either a country-name or country-code </h1>")
+
+# shows the age information for a given region
+def region_population_view(request:HttpRequest):
+    if 'region-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Regions, Age_Per_Region" +
+             " WHERE Regions.region_code = %s COLLATE NOCASE"
+              + " AND Regions.region_code = Age_Per_Region.region_code", [request.GET['region-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+         return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
+
+# returns district age information for the given district number
+def district_population_view(request:HttpRequest):
+    if 'district-code' in request.GET:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT * FROM Age_Per_District, Districts" +
+             " WHERE Districts.district_code = %s COLLATE NOCASE"
+              + " AND Districts.district_code = Age_Per_District.district_code", [request.GET['district-code']])
+            columns = [column[0] for column in cursor.description]
+            rows = cursor.fetchall()
+        results = []
+        for row in rows:
+            results.append(dict(zip(columns, row)))
+        return HttpResponse(results)
+    else:
+        return HttpResponseBadRequest("<h1> you need the distict-code for this function </h1>")   
