@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React, {useState} from 'react'
 import './App.css';
 import ButtonOptions from './components/ButtonOptions';
 import DropDown  from './components/DropDown';

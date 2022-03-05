@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react'
+import React from 'react'
 
 interface specificLevel {
     geoLevel: string;
@@ -30,5 +30,5 @@ export default function ButtonOptions(props:specificLevel) {
             <button onClick={populationFunction}>Population</button>
             <button onClick={agesFunction}>Ages</button>
         </div>
-    )
+    );
 }
