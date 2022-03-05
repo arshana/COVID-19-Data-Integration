@@ -16,7 +16,7 @@ def daily_jhu():
     src_id = get_source_id(src_url, c)
     
     daily_jhu_us_states(c, conn, src_id)
-    #daily_jhu_global(c, conn, src_id)
+    daily_jhu_global(c, conn, src_id)
 
     conn.close()
 
@@ -53,7 +53,7 @@ def daily_jhu_us_states(c, conn, src_id):
         date = ('0' if dt.month < 10 else '')  + str(dt.month) + '-' + ('0' if dt.day < 10 else '') + str(dt.day) + '-' + str(dt.year)
         sql = '''SELECT date_collected FROM Cases_Per_Region WHERE date_collected = ? AND source_id = ?'''
         c.execute(sql, (date, src_id))
-        already_entered = c.fetchall() == []
+        already_entered = c.fetchall() != []
         if not already_entered:
             csv_name = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports_us/' + date + '.csv'
             try:
@@ -97,7 +97,7 @@ def daily_jhu_us_states(c, conn, src_id):
 # Global JHU data
 # ONLY SAFE TO CALL FROM init_jhu in this state (otherwise consider that source may be replicated, etc.)
 # First csv: 01-22-2020
-def init_jhu_global(c, conn, src_id):
+def daily_jhu_global(c, conn, src_id):
     missing_countries_set = set(())  # used to keep track of any countries that might need to be added to the countries table - for debugging purposes
     
     # can be used for country and region codes since they are unique from each other
@@ -110,6 +110,7 @@ def init_jhu_global(c, conn, src_id):
     prev_recovered_dict_subregion = {}
     prev_case_dict_subregion = {}
 
+    i = 0
     with open('jhu_global.json', 'r') as f:
         for line in f:
             if i == 0:
@@ -134,7 +135,7 @@ def init_jhu_global(c, conn, src_id):
         date = ('0' if dt.month < 10 else '')  + str(dt.month) + '-' + ('0' if dt.day < 10 else '') + str(dt.day) + '-' + str(dt.year)
         sql = '''SELECT date_collected FROM Cases_Per_Region WHERE date_collected = ? AND source_id = ?'''
         c.execute(sql, (date, src_id))
-        already_entered = c.fetchall() == []
+        already_entered = c.fetchall() != []
         if not already_entered:
             csv_name = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_daily_reports/' + date + '.csv'
             try:
