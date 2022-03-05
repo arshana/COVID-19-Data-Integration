@@ -61,7 +61,7 @@ def country_regions_covid_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     elif 'country-code' in request.GET:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Cases_Per_Region, Regions, " +
@@ -163,7 +163,7 @@ def country_regions_view(request:HttpRequest):
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Countries, Regions" +
              " WHERE Countries.country_name = %s COLLATE NOCASE"
-              + " AND Countries.country_code = Regions.country_code", [request.GET['district-code']])
+              + " AND Countries.country_code = Regions.country_code", [request.GET['country-name']])
             columns = [column[0] for column in cursor.description]
             rows = cursor.fetchall()
         results = []
@@ -174,7 +174,7 @@ def country_regions_view(request:HttpRequest):
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Countries, Regions" +
              " WHERE Countries.country_code = %s COLLATE NOCASE"
-              + " AND Countries.country_code = Regions.country_code", [request.GET['district-code']])
+              + " AND Countries.country_code = Regions.country_code", [request.GET['country-code']])
             columns = [column[0] for column in cursor.description]
             rows = cursor.fetchall()
         results = []
@@ -199,33 +199,6 @@ def region_districts_view(request:HttpRequest):
         return HttpResponse(json.dumps(results))
     else:
          return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
-
-# shows just the region information (not covid information) for a given country name or country code
-def country_regions_view(request:HttpRequest):
-    if 'country-name' in request.GET:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM Countries, Regions" +
-             " WHERE Countries.country_name = %s COLLATE NOCASE"
-              + " AND Countries.country_code = Regions.country_code", [request.GET['country-name']])
-            columns = [column[0] for column in cursor.description]
-            rows = cursor.fetchall()
-        results = []
-        for row in rows:
-            results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
-    elif 'country-code' in request.GET:
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT * FROM Countries, Regions" +
-             " WHERE Countries.country_code = %s COLLATE NOCASE"
-              + " AND Countries.country_code = Regions.country_code", [request.GET['country-code']])
-            columns = [column[0] for column in cursor.description]
-            rows = cursor.fetchall()
-        results = []
-        for row in rows:
-            results.append(dict(zip(columns, row)))
-        return HttpResponse(json.dumps(results))
-    else:
-         return HttpResponseBadRequest("<h1> you need the country-name or country-code for this function </h1>")
 
 # shows the vacination information for a given region
 def region_vaccination_view(request:HttpRequest):
