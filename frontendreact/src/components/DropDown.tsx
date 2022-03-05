@@ -8,6 +8,7 @@ interface DropDownProp {
 }
 
 
+
 export default function DropDown(props: DropDownProp) {
     const [options, setOptions] = useState<Object[]>([]);
     useEffect(() => {
@@ -21,6 +22,6 @@ export default function DropDown(props: DropDownProp) {
     return (
         <select onChange={props.changeFunction}
         > {options.map((optionItem:any) =><option key={optionItem[props.code]}
-         value={optionItem[props.name]}>{optionItem[props.name] + " (" + optionItem[props.code] + ")"}</option>)} </select>
+         value={optionItem[props.name] + "#" + optionItem[props.code]}>{optionItem[props.name] + " (" + optionItem[props.code] + ")"}</option>)} </select>
     );
 }

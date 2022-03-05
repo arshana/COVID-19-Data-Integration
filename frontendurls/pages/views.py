@@ -33,7 +33,7 @@ def country_national_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     elif 'country-code' in request.GET:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Cases_Per_Country, " +
@@ -44,7 +44,7 @@ def country_national_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need either a country-name or country-code </h1>")
 
@@ -73,7 +73,7 @@ def country_regions_covid_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need either a country-name or country-code  for regional data</h1>")
 
@@ -89,7 +89,7 @@ def region_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need the region-code for this function </h1>")
     
@@ -107,7 +107,7 @@ def country_districts_covid_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     elif 'country-code' in request.GET:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Cases_Per_District, Regions, " +
@@ -120,7 +120,7 @@ def country_districts_covid_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need either a country-name or country-code  for district data</h1>")
 
@@ -137,7 +137,7 @@ def region_districts_covid_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need the region-code for this function </h1>")
 
@@ -153,7 +153,7 @@ def district_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need the distict-code for this function </h1>")
 
@@ -169,7 +169,7 @@ def country_regions_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     elif 'country-code' in request.GET:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Countries, Regions" +
@@ -180,7 +180,7 @@ def country_regions_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
          return HttpResponseBadRequest("<h1> you need the country-name or country-code for this function </h1>")
 
@@ -196,7 +196,7 @@ def region_districts_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
          return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
 
@@ -223,7 +223,7 @@ def country_regions_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
          return HttpResponseBadRequest("<h1> you need the country-name or country-code for this function </h1>")
 
@@ -239,7 +239,7 @@ def region_vaccination_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
          return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
 
@@ -252,7 +252,7 @@ def sources_view(request:HttpRequest):
             results = []
             for row in rows:
                 results.append(dict(zip(columns, row)))
-            return HttpResponse(results)
+            return HttpResponse(json.dumps(results))
 
 # returns country vaccine information nationally given a country name (or a country code)
 def country_national_vaccination_view(request:HttpRequest):
@@ -266,7 +266,7 @@ def country_national_vaccination_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     elif 'country-code' in request.GET:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Vaccinations_Per_Country, " +
@@ -277,7 +277,7 @@ def country_national_vaccination_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need either a country-name or country-code </h1>")
 
@@ -293,7 +293,7 @@ def district_vaccination_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need the distict-code for this function </h1>")
 
@@ -309,7 +309,7 @@ def country_national_strain_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     elif 'country-code' in request.GET:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Strains_Per_Country, " +
@@ -320,7 +320,7 @@ def country_national_strain_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need either a country-name or country-code </h1>")
 
@@ -336,7 +336,7 @@ def region_strain_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
          return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
 
@@ -352,7 +352,7 @@ def district_strain_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need the distict-code for this function </h1>")
 
@@ -368,7 +368,7 @@ def country_national_population_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     elif 'country-code' in request.GET:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Population_Per_Country, " +
@@ -379,7 +379,7 @@ def country_national_population_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need either a country-name or country-code </h1>")
 
@@ -395,7 +395,7 @@ def region_population_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
          return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
 
@@ -411,7 +411,7 @@ def district_population_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need the distict-code for this function </h1>") 
 
@@ -427,7 +427,7 @@ def country_national_age_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     elif 'country-code' in request.GET:
         with connection.cursor() as cursor:
             cursor.execute("SELECT * FROM Age_Per_Country, " +
@@ -438,7 +438,7 @@ def country_national_age_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need either a country-name or country-code </h1>")
 
@@ -454,7 +454,7 @@ def region_age_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
          return HttpResponseBadRequest("<h1> you need a region-code for this function </h1>")
 
@@ -470,6 +470,6 @@ def district_age_view(request:HttpRequest):
         results = []
         for row in rows:
             results.append(dict(zip(columns, row)))
-        return HttpResponse(results)
+        return HttpResponse(json.dumps(results))
     else:
         return HttpResponseBadRequest("<h1> you need the distict-code for this function </h1>")   
