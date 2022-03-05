@@ -147,7 +147,7 @@ c.execute('''CREATE TABLE Population_Per_District(
 
 c.execute('''CREATE TABLE Age_Per_Country(
     date_collected DATETIME2 NOT NULL,
-    country_id VARCHAR(3),
+    country_code VARCHAR(3),
     source_id BIGINT NOT NULL,
     age_group VARCHAR(64) NOT NULL,
     case_number INT NULL,
@@ -158,14 +158,14 @@ c.execute('''CREATE TABLE Age_Per_Country(
     recovery_rate FLOAT NULL,
     hospitalization_rate FLOAT NULL,
     death_rate FLOAT NULL,
-    FOREIGN KEY (country_id) REFERENCES Countries(country_code),
+    FOREIGN KEY (country_code) REFERENCES Countries(country_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
         ''')
 
 c.execute('''CREATE TABLE Age_Per_Region(
     date_collected DATETIME2 NOT NULL,
-    region_id BIGINT,
+    region_code BIGINT,
     source_id BIGINT NOT NULL,
     age_group VARCHAR(64) NOT NULL,
     case_number INT NULL,
@@ -176,7 +176,7 @@ c.execute('''CREATE TABLE Age_Per_Region(
     recovery_rate FLOAT NULL,
     hospitalization_rate FLOAT NULL,
     death_rate FLOAT NULL,
-    FOREIGN KEY (region_id) REFERENCES Regions(region_code),
+    FOREIGN KEY (region_code) REFERENCES Regions(region_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
 
@@ -184,7 +184,7 @@ c.execute('''CREATE TABLE Age_Per_Region(
 
 c.execute('''CREATE TABLE Age_Per_District(
     date_collected DATETIME2 NOT NULL,
-    district_id BIGINT,
+    district_code BIGINT,
     source_id BIGINT NOT NULL,
     age_group VARCHAR(64) NOT NULL,
     case_number INT NULL,
@@ -195,7 +195,7 @@ c.execute('''CREATE TABLE Age_Per_District(
     recovery_rate FLOAT NULL,
     hospitalization_rate FLOAT NULL,
     death_rate FLOAT NULL,
-    FOREIGN KEY (district_id) REFERENCES Districts(district_code),
+    FOREIGN KEY (district_code) REFERENCES Districts(district_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
 

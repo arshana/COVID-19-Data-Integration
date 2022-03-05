@@ -15,6 +15,13 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
+def toint(s):
+    if pd.isna(s):
+        s = "NULL"
+    else:
+        s = int(s)
+    return s
+
 #add country and county level case data and vaccination data for country and state
 def init_us():
     conn = sqlite3.connect('prototype_db')
@@ -120,4 +127,52 @@ def init_us():
             else:
                 sql = '''INSERT INTO Vaccinations_Per_Region (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, region_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
                 c.execute(sql,(row["Date"], row["Admin_Dose_1_Cumulative"], row["Series_Complete_Cumulative"], row["Booster_Cumulative"], region_dict[abb[row["Location"]]], us_src_v))
+    conn.commit()
+
+def init_canada():
+    conn = sqlite3.connect('prototype_db')
+    c = conn.cursor()
+    
+    # get country_code for Canada
+    ca_code = get_country_code("Canada", c)
+    
+    #insert and get source id for Canada data
+    ca_src_url = "https://health-infobase.canada.ca/covid-19/epidemiological-summary-covid-19-cases.html?redir=1#a8"
+    set_source(ca_src_url, c, conn)
+    ca_src = get_source_id(ca_src_url, c)
+    
+    ca_case = pd.read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19-download.csv")
+    ca_v = pd.read_csv("https://health-infobase.canada.ca/src/data/covidLive/vaccination-coverage-map.csv")
+    
+    #insert country and region case data
+    region_dict = {}
+    for index, row in ca_case.iterrows():
+        region = row["prname"]
+        case = row["numconf"]
+        death = toint(row["numdeaths"])
+        recover = toint(row["numrecover"])
+        if region == "Canada":
+            sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
+            c.execute(sql,(ca_code, row["date"], ca_src, death, case, recover))
+        else:
+            if region not in region_dict:
+                sql = '''INSERT INTO Regions (region_name, country_code) VALUES (?, ?)'''
+                c.execute(sql,(region, ca_code))
+                region_dict[region] = get_region_code(ca_code, region, c)
+            sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
+            c.execute(sql,(region_dict[region], row["date"], ca_src, death, case, recover))
+    conn.commit()
+    
+    #insert country and region vaccination data
+    for index, row in ca_v.iterrows():
+        region = row["prename"]
+        first = row["numtotal_atleast1dose"]
+        second = toint(row["numtotal_fully"])
+        third = toint(row["numtotal_additional"])
+        if region == "Canada":
+            sql = '''INSERT INTO Vaccinations_Per_Country (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, country_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
+            c.execute(sql,(row["week_end"], first, second, third, ca_code, ca_src))
+        else:
+            sql = '''INSERT INTO Vaccinations_Per_Region (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, region_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
+            c.execute(sql,(row["week_end"], first, second, third, region_dict[region], ca_src))
     conn.commit()

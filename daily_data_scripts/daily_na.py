@@ -14,6 +14,13 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 
+def toint(s):
+    if pd.isna(s):
+        s = "NULL"
+    else:
+        s = int(s)
+    return s
+
 #update country and county level case data and vaccination data for country and state
 def update_us():
     conn = sqlite3.connect('prototype_db')
@@ -106,4 +113,71 @@ def update_us():
                     c.execute(sql,(row["Date"], row["Admin_Dose_1_Cumulative"], row["Series_Complete_Cumulative"], row["Booster_Cumulative"], region_dict[abb[row["Location"]]], us_src_v))
         else:
             break
+    conn.commit()
+
+def update_canada():
+    conn = sqlite3.connect('prototype_db')
+    c = conn.cursor()
+    
+    # get country_code for Canada
+    ca_code = get_country_code("Canada", c)
+    
+    #get source id for Canada data
+    ca_src_url = "https://health-infobase.canada.ca/covid-19/epidemiological-summary-covid-19-cases.html?redir=1#a8"
+    ca_src = get_source_id(ca_src_url, c)
+    
+    ca_case = pd.read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19-download.csv")
+    ca_v = pd.read_csv("https://health-infobase.canada.ca/src/data/covidLive/vaccination-coverage-map.csv")
+    
+    #insert country and region case data
+    ca_case = ca_case[::-1]
+    for index, row in ca_case.iterrows():
+        region = row["prname"]
+        case = row["numconf"]
+        death = toint(row["numdeaths"])
+        recover = toint(row["numrecover"])
+        if region == "Canada":
+            date1 = row['date']
+            c.execute('SELECT * FROM Cases_Per_Country WHERE country_code ="' + ca_code + '" AND date_collected ="' + str(date1)+ '"')
+            result = c.fetchall()
+            if len(result) == 0:
+                sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
+                c.execute(sql,(ca_code, row["date"], ca_src, death, case, recover))
+            else:
+                break
+        else:
+            region_code = get_region_code(region_dict[state], county, c)
+            date1 = row['date']
+            c.execute('SELECT * FROM Cases_Per_District WHERE district_code=' + str(county_code) + ' AND date_collected ="' + str(date1)+ '"')
+            result = c.fetchall()
+            if len(result) == 0:
+                sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
+                c.execute(sql,(region_code, row["date"], ca_src, death, case, recover))
+            else:
+                break
+    conn.commit()
+    
+    #insert country and region vaccination data
+    ca_v = ca_v[::-1]
+    for index, row in ca_v.iterrows():
+        region = row["prename"]
+        first = row["numtotal_atleast1dose"]
+        second = toint(row["numtotal_fully"])
+        third = toint(row["numtotal_additional"])
+        if region == "Canada":
+            date1 = row["week_end"]
+            c.execute('SELECT * FROM Vaccinations_Per_Country WHERE country_code ="' + ca_code + '" AND date_collected ="' + str(date1)+ '"')
+            result = c.fetchall()
+            if len(result) == 0:
+                sql = '''INSERT INTO Vaccinations_Per_Country (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, country_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
+                c.execute(sql,(row["week_end"], first, second, third, ca_code, ca_src))
+            else:
+                break
+        else:
+            date1 = row["week_end"]
+            c.execute('SELECT * FROM Vaccinations_Per_Region WHERE region_code ="' + region_code + '" AND date_collected ="' + str(date1)+ '"')
+            result = c.fetchall()
+            if len(result) == 0:
+                sql = '''INSERT INTO Vaccinations_Per_Region (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, region_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
+                c.execute(sql,(row["week_end"], first, second, third, region_dict[region], ca_src))
     conn.commit()

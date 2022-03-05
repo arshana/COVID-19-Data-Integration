@@ -1,21 +1,27 @@
 import React, {useEffect, useState} from 'react'
-import axios from 'axios';
 
 interface DropDownProp {
     geoOption: string;
+    name: string;
+    code: string;
+    changeFunction(event: React.ChangeEvent<HTMLSelectElement>):void;
 }
+
+
+
 export default function DropDown(props: DropDownProp) {
-    const [options, setOptions] = useState<string[]>([]);
+    const [options, setOptions] = useState<Object[]>([]);
     useEffect(() => {
-        const updateGeoOptions =  async (geoOption: string) => {
-            console.log('127.0.0.1:8000/' + geoOption);
-            const fetchedOptions = await axios
-            .get<any>("http://127.0.0.1:8000/countries/");
-            console.log(fetchedOptions);
+        const updateGeoOptions =  async () => {
+            const fetchedOptions:Object[] = await (await fetch("http://127.0.0.1:8000/" + props.geoOption + "/")).json();
+            setOptions(fetchedOptions)
         };
-        updateGeoOptions(props.geoOption)
+        updateGeoOptions();
     }, [props.geoOption]);
+    console.log(options);
     return (
-        <p> a </p>
+        <select onChange={props.changeFunction}
+        > {options.map((optionItem:any) =><option key={optionItem[props.code]}
+         value={optionItem[props.name] + "#" + optionItem[props.code]}>{optionItem[props.name] + " (" + optionItem[props.code] + ")"}</option>)} </select>
     );
 }
