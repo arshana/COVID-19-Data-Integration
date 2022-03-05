@@ -45,7 +45,7 @@ def daily_italy():
         date = get_italy_date(dt)
         sql = '''SELECT date_collected FROM Cases_Per_Country WHERE date_collected = ? AND source_id = ?'''
         c.execute(sql, (date, italy_src))
-        already_entered = c.fetchall() == []
+        already_entered = c.fetchall() != []
         if not already_entered:
             country_rows = df_total.loc[df_total['date'] == date]
             for i in range(len(country_rows)):
@@ -67,7 +67,7 @@ def daily_italy():
         date = get_italy_date(dt)
         sql = '''SELECT date_collected FROM Cases_Per_Region WHERE date_collected = ? AND source_id = ?'''
         c.execute(sql, (date, italy_src))
-        already_entered = c.fetchall() == []
+        already_entered = c.fetchall() != []
         if not already_entered:
             region_rows = df_region.loc[df_region['date'] == date]
             for i in range(len(region_rows)):
@@ -112,7 +112,7 @@ def get_italy_date(dt):
 def italy_district_helper(date, italy_code, italy_src, df_subregion, c, conn):
     sql = '''SELECT date_collected FROM Cases_Per_District WHERE date_collected = ? AND source_id = ?'''
     c.execute(sql, (date, italy_src))
-    already_entered = c.fetchall() == []
+    already_entered = c.fetchall() != []
     if not already_entered:
         subregion_rows = df_subregion.loc[df_subregion['date'] == date]
         for i in range(len(subregion_rows)):
@@ -162,7 +162,7 @@ def ukraine_helper(date, ukraine_code, ukraine_src, c, conn):
     try:
         sql = '''SELECT date_collected FROM Cases_Per_Region WHERE date_collected = ? AND source_id = ?'''
         c.execute(sql, (date, ukraine_src))
-        already_entered = c.fetchall() == []
+        already_entered = c.fetchall() != []
         if not already_entered:
             csv_name = 'https://raw.githubusercontent.com/dmytro-derkach/covid-19-ukraine/master/daily_reports/' + date + '.csv'
             df = pd.read_csv(csv_name, error_bad_lines=False)
