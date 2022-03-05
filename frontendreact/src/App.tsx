@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import './App.css';
+import ButtonOptions from './components/ButtonOptions';
 import DropDown  from './components/DropDown';
 
 function App() {
@@ -11,9 +12,14 @@ function App() {
   const selectedCountryCode:string = (selectedCountry !== "" ? selectedCountry.split("#")[1] : "");
   return (
     <div className="App">
-      <DropDown geoOption='countries' name='country_name' code='country_code' changeFunction={countryFunction}/>
-      {selectedCountryName !== "" ? <p> Selected Country is {selectedCountryName} </p> :
-                                <p> please select a country to work with</p>}
+      <DropDown urlEnding='countries/' geoLevel='country' changeFunction={countryFunction}/>
+      {selectedCountryName !== "" ?
+       <div> 
+          <p> Selected Country is {selectedCountryName} </p> 
+          <DropDown urlEnding={'country-regions/?country-code=' + selectedCountryCode} geoLevel='region' changeFunction={countryFunction} />
+        </div>
+       : <p> please select a country to work with</p>}
+      <ButtonOptions geoLevel='country' geoCode='JP'/>
     </div>
   );
 }
