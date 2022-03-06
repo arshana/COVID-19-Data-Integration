@@ -113,39 +113,42 @@ CREATE TABLE Vaccinations_Per_District(
 
 -- keeps track of strain data per country
 CREATE TABLE Strains_Per_Country(
-    country_code VARCHAR(3) PRIMARY KEY,
+    date_collected DATETIME2 NOT NULL,
+    country_code VARCHAR(3),
     source_id BIGINT NOT NULL,
-    alpha_rate INT NULL,
-    beta_rate INT NULL,
-    gamma_rate INT NULL,
-    delta_rate INT NULL,
-    omicron_rate INT NULL,
+    alpha_rate FLOAT NULL,
+    beta_rate FLOAT NULL,
+    gamma_rate FLOAT NULL,
+    delta_rate FLOAT NULL,
+    omicron_rate FLOAT NULL,
     FOREIGN KEY (country_code) REFERENCES Countries(country_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
-);
+
 
 -- keeps track of strain data per region
 CREATE TABLE Strains_Per_Region(
-    region_code BIGINT PRIMARY KEY,
+    date_collected DATETIME2 NOT NULL,
+    region_code BIGINT,
     source_id INT NOT NULL,
-    alpha_rate INT NULL,
-    beta_rate INT NULL,
-    gamma_rate INT NULL,
-    delta_rate INT NULL,
-    omicron_rate INT NULL,
+    alpha_rate FLOAT NULL,
+    beta_rate FLOAT NULL,
+    gamma_rate FLOAT NULL,
+    delta_rate FLOAT NULL,
+    omicron_rate FLOAT NULL,
     FOREIGN KEY (region_code) REFERENCES Regions(region_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
 
 -- keeps track of strain data per district
 CREATE TABLE Strains_Per_District(
-    district_code BIGINT PRIMARY KEY,
+    date_collected DATETIME2 NOT NULL,
+    district_code BIGINT,
     source_id INT NOT NULL,
-    alpha_rate INT NULL,
-    beta_rate INT NULL,
-    gamma_rate INT NULL,
-    delta_rate INT NULL,
-    omicron_rate INT NULL,
+    alpha_rate FLOAT NULL,
+    beta_rate FLOAT NULL,
+    gamma_rate FLOAT NULL,
+    delta_rate FLOAT NULL,
+    omicron_rate FLOAT NULL,
     FOREIGN KEY (district_code) REFERENCES Districts(district_code),
     FOREIGN KEY (source_id) REFERENCES Sources(source_id)
 );
