@@ -128,6 +128,7 @@ def update_canada():
     
     ca_case = pd.read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19-download.csv")
     ca_v = pd.read_csv("https://health-infobase.canada.ca/src/data/covidLive/vaccination-coverage-map.csv")
+    ca_s = pd.read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19-epiSummary-variants.csv")
     
     #insert country and region case data
     ca_case = ca_case[::-1]
@@ -180,4 +181,72 @@ def update_canada():
             if len(result) == 0:
                 sql = '''INSERT INTO Vaccinations_Per_Region (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, region_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
                 c.execute(sql,(row["week_end"], first, second, third, region_dict[region], ca_src))
+    conn.commit()
+    
+    ca_strain = {}
+    for index, row in ca_s.iterrows():
+        if row["Variant Grouping"] == "VOC":
+            if row["Collection (week)"] not in ca_strain:
+                ca_strain[row["Collection (week)"]] = {"Alpha":0 , "Beta": 0, "Gamma" :0, "Delta": 0, "Omicron": 0}
+            ca_strain[row["Collection (week)"]][row["_Identifier"]] = ca_strain[row["Collection (week)"]][row["_Identifier"]] + row["%CT Count of Sample #"]
+    for date1 in ca_strain:
+        c.execute('SELECT * FROM Strains_Per_Country WHERE country_code ="' + ca_code + '" AND date_collected ="' + str(date1)+ '"')
+        result = c.fetchall()
+        if len(result) == 0:
+            sql = '''INSERT INTO Strains_Per_Country (date_collected, country_code, source_id, alpha_rate, beta_rate, gamma_rate, delta_rate, omicron_rate) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
+            c.execute(sql,(date, ca_code, ca_src, ca_strain[date]["Alpha"], ca_strain[date]["Beta"], ca_strain[date]["Gamma"],ca_strain[date]["Delta"], ca_strain[date]["Omicron"]))
+    conn.commit()
+
+def update_guatemala():
+    # get country_code for Guatemala
+    gu_code = get_country_code("Guatemala", c)
+    
+    #get source id for US data
+    gu_src_url = "https://tablerocovid.mspas.gob.gt/"
+    gu_src = get_source_id(gu_src_url, c)
+    
+    v_src = "https://github.com/owid/covid-19-data"
+    v_src = get_source_id(v_src, c)
+    
+    #gu_death = pd.read_csv("https://gtmvigilanciacovid.shinyapps.io/1GEAxasgYEyITt3Y2GrQqQFEDKW89fl9/_w_0d14592e/session/1f0e3b3486ac8317dfaad7a0be3f8481/download/fallecidosFF?w=0d14592e")
+    #gu_case = pd.read_csv("https://gtmvigilanciacovid.shinyapps.io/1GEAxasgYEyITt3Y2GrQqQFEDKW89fl9/_w_0d14592e/session/1f0e3b3486ac8317dfaad7a0be3f8481/download/confirmadosFER?w=0d14592e")
+    gu_v = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/country_data/Guatemala.csv")
+    
+    gu_case = pd.read_csv("Confirmados.csv")
+    gu_death = pd.read_csv("Fallecidos.csv")
+    
+    gu = pd.merge(gu_case, gu_death, on=["departamento", "municipio"])
+    #insert district case data and population data for guatemala
+    region_dict = {}
+    city_dict = {}
+    for index, row in gu.iterrows():
+        if index >= 1:
+            region = row["departamento"]
+            city = row["municipio"]
+            for i in range(len(row) - 1, 4, -1):
+                if "_y" in gu.columns[i]:
+                    date1 = gu.columns[i].replace("_y", "")
+                    district_code = get_district_code(get_region_code(region), city, c)
+                    c.execute('SELECT * FROM Cases_Per_District WHERE district_code=' + str(district_code) + ' AND date_collected ="' + str(date1)+ '"')
+                    result = c.fetchall()
+                    if len(result) == 0:
+                        case = check(row[date1 + "_x"])
+                        death = check(row[row[i]])
+                        sql = '''INSERT INTO Cases_Per_District (district_code, date_collected, source_id, death_numbers, case_numbers) VALUES (?, ?, ?, ?, ?)'''
+                        c.execute(sql,(district_code, date1, gu_src, death, case))
+                    else:
+                        break
+    conn.commit()
+    
+    #insert vaccination country data for guatemala
+    gu_v = gu_v[::-1]
+    for index, row in gu_v.iterrows():
+        date1 = row['date']
+        c.execute('SELECT * FROM Vaccinations_Per_Country WHERE country_code ="' + gu_code + '" AND date_collected ="' + str(date1)+ '"')
+        result = c.fetchall()
+        if len(result) == 0:
+            sql = '''INSERT INTO Vaccinations_Per_Country (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, country_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
+            c.execute(sql, (row["date"], toint(row["people_vaccinated"]), toint(row["people_fully_vaccinated"]), toint(row["total_boosters"]), gu_code, v_src))
+        else:
+            break
     conn.commit()

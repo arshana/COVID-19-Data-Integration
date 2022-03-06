@@ -201,6 +201,21 @@ c.execute('''CREATE TABLE Age_Per_District(
 
         ''')
 
+c.execute('''CREATE TABLE Strains_Per_Country(
+    date_collected DATETIME2 NOT NULL,
+    country_code VARCHAR(3),
+    source_id BIGINT NOT NULL,
+    alpha_rate FLOAT NULL,
+    beta_rate FLOAT NULL,
+    gamma_rate FLOAT NULL,
+    delta_rate FLOAT NULL,
+    omicron_rate FLOAT NULL,
+    FOREIGN KEY (country_code) REFERENCES Countries(country_code),
+    FOREIGN KEY (source_id) REFERENCES Sources(source_id)
+);
+
+        ''')
+
                   
 conn.commit()
 
@@ -213,3 +228,4 @@ c.close()
 from initial_data_scripts.init_europe import init_italy, init_ukraine
 from initial_data_scripts.init_asia import init_japan, init_korea, init_ina
 from initial_data_scripts.init_global import init_jhu
+from initial_data_scripts.init_north_america import init_us, init_canada, init_guatemala
