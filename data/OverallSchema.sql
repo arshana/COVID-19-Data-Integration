@@ -122,7 +122,7 @@ CREATE TABLE Strains_Per_Country(
     delta_rate FLOAT NULL,
     omicron_rate FLOAT NULL,
     FOREIGN KEY (country_code) REFERENCES Countries(country_code),
-    FOREIGN KEY (source_id) REFERENCES Sources(source_id)
+    FOREIGN KEY (source_id) REFERENCES Sources(source_id));
 
 
 -- keeps track of strain data per region
