@@ -24,6 +24,13 @@ from urllib.request import urlopen
 def string_to_int(s):
     return s.replace(",", "").strip()
 
+def toint1(s):
+    if pd.isna(s):
+        s = 0
+    else:
+        s = int(s)
+    return s
+
 def init_japan():
     conn = sqlite3.connect('prototype_db')
     c = conn.cursor()
@@ -390,3 +397,117 @@ def init_ina():
         c.execute(sql,(region_dict[city], row["Population (2020 Census)[5]"], datetime.datetime(2020, 1, 1).date()))
     conn.commit()
     conn.close()
+
+def init_india():
+    
+    conn = sqlite3.connect('prototype_db')
+    c = conn.cursor()
+    
+    # get country_code for India
+    ind_code = get_country_code("India", c)
+    
+    #insert and get source id for India data
+    ind_src_url = "https://prsindia.org/covid-19/cases"
+    set_source(ind_src_url, c, conn)
+    ind_src = get_source_id(ind_src_url, c)
+    
+    v_src = "https://github.com/owid/covid-19-data"
+    #set_source(v_src, c, conn)
+    v_src = get_source_id(v_src, c)
+    
+    ind_case = pd.read_csv("https://prsindia.org/covid-19/cases/download")
+    ind_v = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/country_data/India.csv")
+
+    #inser country, region case data for india
+    lastRegion = ""
+    region_dict = {}
+    for index,row in ind_case.iterrows():
+        region = row["Region"]
+        if region != lastRegion:
+            i = index + 3
+            lastC = 0
+            lastR = 0
+            lastD = 0
+        lastRegion = region
+        if index >= i:
+            case = toint1(row["Confirmed Cases"]) - lastC
+            death = toint1(row["Death"]) - lastD
+            recover = toint1(row["Cured/Discharged"]) - lastR
+            lastC = toint1(row["Confirmed Cases"])
+            lastR = toint1(row["Cured/Discharged"])
+            lastD = toint1(row["Death"])
+            if region != "World":
+                if region == "India":
+                    sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
+                    c.execute(sql,(ind_code, row["Date"], ind_src, death, case, recover))
+                else:
+                    if region not in region_dict:
+                        sql = '''INSERT INTO Regions (region_name, country_code) VALUES (?, ?)'''
+                        c.execute(sql,(region, ind_code))
+                        region_dict[region] = get_region_code(ind_code, region, c)
+                    sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
+                    c.execute(sql,(region_dict[region], row["Date"], ind_src, death, case, recover))
+    conn.commit()
+    
+    #insert population for india
+    sql = '''INSERT INTO Population_Per_Country (country_code, population_amount, date_collected) VALUES (?, ?, ?)'''
+    c.execute(sql,(ind_code, 1352642280, datetime.datetime(2019, 11, 9).date()))
+    conn.commit()
+    
+    
+    #insert vaccination country data for guatemala
+    for index, row in ind_v.iterrows():
+        sql = '''INSERT INTO Vaccinations_Per_Country (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, country_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
+        c.execute(sql, (row["date"], toint(row["people_vaccinated"]), toint(row["people_fully_vaccinated"]), toint(row["total_boosters"]), ind_code, v_src))
+    conn.commit()
+
+#slow to run
+def init_china():
+    # get country_code for china
+    cn_code = get_country_code("China", c)
+    
+    #insert and get source id for china data
+    cn_src_url = "https://github.com/BlankerL/DXY-COVID-19-Data"
+    set_source(cn_src_url, c, conn)
+    cn_src = get_source_id(cn_src_url, c)
+    
+    date1 = date.today()
+    date1 = str(date1).replace("-", ".")
+    link = "https://github.com/BlankerL/DXY-COVID-19-Data/releases/download/" + date1 + "/DXYArea.csv"
+    cn_case = pd.read_csv(link)
+    
+    #insert country, region and distrct case data for china
+    region_dict = {}
+    city_dict = {}
+    check = {}
+    for index,row in cn_case.iterrows():
+        region = row["countryEnglishName"]
+        if region == "China":
+            case = row["province_confirmedCount"]
+            death = row["province_deadCount"]
+            recover = row["province_curedCount"]
+            date1 = row["updateTime"][:10]
+            if row["provinceEnglishName"] == "China":
+                sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
+                c.execute(sql,(cn_code, date1, cn_src, death, case, recover))
+            else:
+                if region not in region_dict:
+                    sql = '''INSERT INTO Regions (region_name, country_code) VALUES (?, ?)'''
+                    c.execute(sql,(region, cn_code))
+                    region_dict[region] = get_region_code(cn_code, region, c)
+                    city_dict[region] = {} 
+                if date1 not in check:
+                    check[date1] = set()
+                if region not in check[date1]: 
+                    sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
+                    c.execute(sql,(region_dict[region], date1, cn_src, death, case, recover))
+                    check[date1].add(region)
+                if (pd.isna(row["cityEnglishName"]) ==  False):
+                    city = row["cityEnglishName"]
+                    if city not in region_dict:
+                        sql = '''INSERT INTO Districts (district_name, region_code) VALUES (?, ?)'''
+                        c.execute(sql,(city, region_dict[region]))
+                        city_dict[region][city] = get_district_code(region_dict[region], city, c)
+                    sql = '''INSERT INTO Cases_Per_District (district_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
+                    c.execute(sql,(city_dict[region][city], date1, cn_src, row["city_deadCount"], row["city_confirmedCount"], row["city_curedCount"]))
+    conn.commit()

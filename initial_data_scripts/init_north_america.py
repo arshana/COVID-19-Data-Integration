@@ -212,6 +212,9 @@ def init_canada():
     conn.commit()
 
 def init_guatemala():
+    conn = sqlite3.connect('prototype_db')
+    c = conn.cursor()
+    
     # get country_code for Guatemala
     gu_code = get_country_code("Guatemala", c)
     

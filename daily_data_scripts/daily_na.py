@@ -147,9 +147,9 @@ def update_canada():
             else:
                 break
         else:
-            region_code = get_region_code(region_dict[state], county, c)
+            region_code = get_region_code(ca_code, region, c)
             date1 = row['date']
-            c.execute('SELECT * FROM Cases_Per_District WHERE district_code=' + str(county_code) + ' AND date_collected ="' + str(date1)+ '"')
+            c.execute('SELECT * FROM Cases_Per_Region WHERE region_code=' + str(region_code) + ' AND date_collected ="' + str(date1)+ '"')
             result = c.fetchall()
             if len(result) == 0:
                 sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
@@ -176,11 +176,15 @@ def update_canada():
                 break
         else:
             date1 = row["week_end"]
-            c.execute('SELECT * FROM Vaccinations_Per_Region WHERE region_code ="' + region_code + '" AND date_collected ="' + str(date1)+ '"')
+            region_code = get_region_code(ca_code, region, c)
+            c.execute('SELECT * FROM Vaccinations_Per_Region WHERE region_code ="' + str(region_code) + '" AND date_collected ="' + str(date1)+ '"')
             result = c.fetchall()
             if len(result) == 0:
                 sql = '''INSERT INTO Vaccinations_Per_Region (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, region_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
                 c.execute(sql,(row["week_end"], first, second, third, region_dict[region], ca_src))
+            else:
+                break
+
     conn.commit()
     
     ca_strain = {}
@@ -198,6 +202,9 @@ def update_canada():
     conn.commit()
 
 def update_guatemala():
+    conn = sqlite3.connect('prototype_db')
+    c = conn.cursor()
+    
     # get country_code for Guatemala
     gu_code = get_country_code("Guatemala", c)
     
@@ -208,12 +215,10 @@ def update_guatemala():
     v_src = "https://github.com/owid/covid-19-data"
     v_src = get_source_id(v_src, c)
     
-    #gu_death = pd.read_csv("https://gtmvigilanciacovid.shinyapps.io/1GEAxasgYEyITt3Y2GrQqQFEDKW89fl9/_w_0d14592e/session/1f0e3b3486ac8317dfaad7a0be3f8481/download/fallecidosFF?w=0d14592e")
-    #gu_case = pd.read_csv("https://gtmvigilanciacovid.shinyapps.io/1GEAxasgYEyITt3Y2GrQqQFEDKW89fl9/_w_0d14592e/session/1f0e3b3486ac8317dfaad7a0be3f8481/download/confirmadosFER?w=0d14592e")
+    gu_death = pd.read_csv("https://gtmvigilanciacovid.shinyapps.io/1GEAxasgYEyITt3Y2GrQqQFEDKW89fl9/_w_0d14592e/session/1f0e3b3486ac8317dfaad7a0be3f8481/download/fallecidosFF?w=0d14592e")
+    gu_case = pd.read_csv("https://gtmvigilanciacovid.shinyapps.io/1GEAxasgYEyITt3Y2GrQqQFEDKW89fl9/_w_0d14592e/session/1f0e3b3486ac8317dfaad7a0be3f8481/download/confirmadosFER?w=0d14592e")
     gu_v = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/country_data/Guatemala.csv")
     
-    gu_case = pd.read_csv("Confirmados.csv")
-    gu_death = pd.read_csv("Fallecidos.csv")
     
     gu = pd.merge(gu_case, gu_death, on=["departamento", "municipio"])
     #insert district case data and population data for guatemala
