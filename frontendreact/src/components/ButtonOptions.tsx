@@ -5,7 +5,9 @@ interface specificLevel {
     geoCode: string;
 }
 
-
+// creates different button options to look into the data
+// geoLevel = specific area of interest
+// geoCode = the parameter for the different searches
 export default function ButtonOptions(props:specificLevel) {
     const casesFunction = (event:React.MouseEvent<HTMLButtonElement>):void => {
         window.open('http://127.0.0.1:8000/' + props.geoLevel + '-cases/?' + props.geoLevel + '-code=' + props.geoCode, '_blank')
@@ -24,6 +26,7 @@ export default function ButtonOptions(props:specificLevel) {
     }
     return (
         <div>
+            <h4>Push these buttons to get data related to your selected {props.geoLevel}</h4>
             <button onClick={casesFunction}>Cases</button>
             <button onClick={vaccinationsFunction}>Vaccinations</button>
             <button onClick={strainsFunction}>Strains</button>
