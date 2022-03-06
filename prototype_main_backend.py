@@ -213,3 +213,4 @@ c.close()
 from initial_data_scripts.init_europe import init_italy, init_ukraine
 from initial_data_scripts.init_asia import init_japan, init_korea, init_ina
 from initial_data_scripts.init_global import init_jhu
+from daily_data_scripts.daily_global import daily_jhu
