@@ -9,7 +9,7 @@ sys.path.append("..")
 from util import *
 
 def daily_jrc():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     src_url = "https://github.com/ec-jrc/COVID-19"
@@ -123,7 +123,7 @@ def daily_italy():
             i += 1
         f.close()
 
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     # get country_code
@@ -230,7 +230,7 @@ def italy_district_helper(date, italy_code, italy_src, df_subregion, c, conn):
 
 # Updates daily. Check for both the last two days' and today's data to make sure they are all gotten regardless of when the source is updated
 def daily_ukraine():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     # get country_code for Ukraine

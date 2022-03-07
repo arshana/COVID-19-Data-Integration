@@ -30,7 +30,7 @@ def toint1(s):
     return s
 
 def update_korea():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     korea_code = get_country_code("South Korea", c)
@@ -151,7 +151,7 @@ def update_korea():
     conn.close()
     
 def update_japan():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     # get country_code for Japan
@@ -271,7 +271,7 @@ def update_japan():
     c.close()
 
 def ina():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     # get country_code for Indonesia
@@ -373,7 +373,7 @@ def ina():
     conn.commit() 
 
 def update_india():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     # get country_code for India
@@ -441,7 +441,7 @@ def update_china():
     # get country_code for china
     cn_code = get_country_code("China", c)
     
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     #insert and get source id for china data
