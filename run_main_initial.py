@@ -1,10 +1,16 @@
+# This script should only be run once at the initialization of the database.
+# It includes creating the tables and populating them with all the initial data.
+# After this, run the run_daily.py script once a day to stay up-to-date.
+# NOTE: If you ever fall out of date by more than a day or two, 
+# either write your own scripts to catch up or start fresh with this script!
+
 import sqlite3
 import pandas as pd
 
 conn = sqlite3.connect('sqlite_db')
 c = conn.cursor()
 
-# TODO Namibia's country code is currently being read as NULL; wait for SQLServer and then debug
+# Create all tables.
 c.execute('''
             CREATE TABLE Countries(
             country_code VARCHAR(3) PRIMARY KEY,
