@@ -10,7 +10,7 @@ sys.path.append("..")
 from util import *
 
 def init_jrc():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     src_url = "https://github.com/ec-jrc/COVID-19"
@@ -35,7 +35,8 @@ def init_jrc_countries(src_id, c, conn):
     acceptable_countries_set = set(("Germany", "United Kingdom", "Italy", "Spain", "Romania", "Netherlands", "Belgium", "Sweden", "Austria", "Switzerland", "Slovakia", "Norway", "Albania"))  
 
     dt = datetime.datetime(2020, 2, 28)
-    while(True):
+    end_dt = datetime.datetime.today() + datetime.timedelta(days=1)
+    while(dt != end_dt):
         try:
             date = str(dt.year) + ('0' if dt.month < 10 else '') + str(dt.month) + ('0' if dt.day < 10 else '') + str(dt.day)
             csv = "https://raw.githubusercontent.com/ec-jrc/COVID-19/master/data-by-country/jrc-covid-19-countries-" + date + ".csv"
@@ -77,6 +78,7 @@ def init_jrc_countries(src_id, c, conn):
         except:
             pass
         dt += datetime.timedelta(days=1)
+        print(csv)
 
     # debugging
     #print(missing_countries_set)
@@ -98,7 +100,7 @@ def init_italy():
     df_region = pd.read_csv('https://raw.githubusercontent.com/RamiKrispin/covid19Italy/master/csv/italy_region.csv', error_bad_lines=False)
     df_subregion = pd.read_csv('https://raw.githubusercontent.com/RamiKrispin/covid19Italy/master/csv/italy_province.csv', error_bad_lines=False)
 
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     # get country_code
@@ -171,7 +173,7 @@ def init_italy():
 
 # Starts on 03/03/2020.
 def init_ukraine():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     # get country_code for Ukraine

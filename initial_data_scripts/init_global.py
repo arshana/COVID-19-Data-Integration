@@ -7,7 +7,7 @@ import json
 from util import *
 
 def init_jhu():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     # insert and get source id for source

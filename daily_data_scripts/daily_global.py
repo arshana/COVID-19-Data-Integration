@@ -7,7 +7,7 @@ import json
 from util import *
 
 def daily_jhu():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     # insert and get source id for source
@@ -16,7 +16,7 @@ def daily_jhu():
     src_id = get_source_id(src_url, c)
     
     daily_jhu_us_states(c, conn, src_id)
-    daily_jhu_global(c, conn, src_id)
+    #daily_jhu_global(c, conn, src_id)
 
     conn.close()
 
