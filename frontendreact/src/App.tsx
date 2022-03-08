@@ -28,10 +28,10 @@ function App() {
       <DropDown urlEnding='all-from-table/?table=countries' geoLevel='country' changeFunction={countryFunction}/>
       <InteractionPanel selectedGeoLevel='countries' selectedGeoCode={selectedCountryCode}
        optionsUrlEnding={'regions-from-country/?country-code=' + selectedCountryCode}
-       optionsGeoLevel='regions' areaFunction={regionFunction} />
+       optionsGeoLevel='region' areaFunction={regionFunction} />
       <InteractionPanel selectedGeoLevel='regions' selectedGeoCode={selectedRegionCode}
        optionsUrlEnding={'districts-from-region/?region-code=' + selectedRegionCode}
-       optionsGeoLevel='districts' areaFunction={districtFunction} />
+       optionsGeoLevel='district' areaFunction={districtFunction} />
        {selectedDistrictCode !== '' ? <ButtonOptions geoLevel='districts' geoCode={selectedDistrictCode}/> : null}
     </div>
   );
