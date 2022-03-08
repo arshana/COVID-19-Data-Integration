@@ -32,7 +32,7 @@ def toint1(s):
     return s
 
 def init_japan():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     # get country_code for Japan
@@ -154,7 +154,7 @@ def init_japan():
 
 def init_korea():
 
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     # get country_code for Korea
@@ -299,7 +299,7 @@ def init_korea():
     conn.close()
 
 def init_ina():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     # get country_code for Indonesia
@@ -400,7 +400,7 @@ def init_ina():
 
 def init_india():
     
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     # get country_code for India
@@ -463,6 +463,9 @@ def init_india():
 
 #slow to run
 def init_china():
+    conn = sqlite3.connect('prototype_db')
+    c = conn.cursor()
+    
     # get country_code for china
     cn_code = get_country_code("China", c)
     
@@ -510,4 +513,9 @@ def init_china():
                         city_dict[region][city] = get_district_code(region_dict[region], city, c)
                     sql = '''INSERT INTO Cases_Per_District (district_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
                     c.execute(sql,(city_dict[region][city], date1, cn_src, row["city_deadCount"], row["city_confirmedCount"], row["city_curedCount"]))
+    conn.commit()
+
+    #insert population data for china
+    sql = '''INSERT INTO Population_Per_Country (country_code, population_amount, date_collected) VALUES (?, ?, ?)'''
+    c.execute(sql,(cn_code,  1412600000, datetime.datetime(2021, 5, 1).date()))
     conn.commit()
