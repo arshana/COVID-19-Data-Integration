@@ -10,19 +10,19 @@ interface specificLevel {
 // geoCode = the parameter for the different searches
 export default function ButtonOptions(props:specificLevel) {
     const casesFunction = (event:React.MouseEvent<HTMLButtonElement>):void => {
-        window.open('http://127.0.0.1:8000/' + props.geoLevel + '-cases/?' + props.geoLevel + '-code=' + props.geoCode, '_blank')
+        window.open('http://127.0.0.1:8000/info-from-area/?area=' + props.geoLevel + '&info-type=cases&area-code=' + props.geoCode, '_blank')
     }
     const vaccinationsFunction = (event:React.MouseEvent<HTMLButtonElement>):void => {
-        window.open('http://127.0.0.1:8000/' + props.geoLevel + '-vaccinations/?' + props.geoLevel + '-code=' + props.geoCode, '_blank')
+        window.open('http://127.0.0.1:8000/info-from-area/?area=' + props.geoLevel + '&info-type=vaccinations&area-code=' + props.geoCode, '_blank')
     }
     const strainsFunction = (event:React.MouseEvent<HTMLButtonElement>):void => {
-        window.open('http://127.0.0.1:8000/' + props.geoLevel + '-strains/?' + props.geoLevel + '-code=' + props.geoCode, '_blank')
+        window.open('http://127.0.0.1:8000/info-from-area/?area=' + props.geoLevel + '&info-type=strains&area-code=' + props.geoCode, '_blank')
     }
     const populationFunction = (event:React.MouseEvent<HTMLButtonElement>):void => {
-        window.open('http://127.0.0.1:8000/' + props.geoLevel + '-population/?' + props.geoLevel + '-code=' + props.geoCode, '_blank')
+        window.open('http://127.0.0.1:8000/info-from-area/?area=' + props.geoLevel + '&info-type=population&area-code=' + props.geoCode, '_blank')
     }
     const agesFunction = (event:React.MouseEvent<HTMLButtonElement>):void => {
-        window.open('http://127.0.0.1:8000/' + props.geoLevel + '-ages/?' + props.geoLevel + '-code=' + props.geoCode, '_blank')
+        window.open('http://127.0.0.1:8000/info-from-area/?area=' + props.geoLevel + '&info-type=age&area-code=' + props.geoCode, '_blank')
     }
     return (
         <div>

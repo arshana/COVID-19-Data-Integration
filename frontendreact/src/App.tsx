@@ -25,14 +25,14 @@ function App() {
   const selectedDistrictCode:string = (selectedDistrict !== "" ? selectedDistrict.split("#")[1] : "");
   return (
     <div className="App">
-      <DropDown urlEnding='countries/' geoLevel='country' changeFunction={countryFunction}/>
-      <InteractionPanel selectedGeoLevel='country' selectedGeoCode={selectedCountryCode}
-       optionsUrlEnding={'country-regions/?country-code=' + selectedCountryCode}
-       optionsGeoLevel='region' areaFunction={regionFunction} />
-      <InteractionPanel selectedGeoLevel='region' selectedGeoCode={selectedRegionCode}
-       optionsUrlEnding={'region-districts/?region-code=' + selectedRegionCode}
-       optionsGeoLevel='district' areaFunction={districtFunction} />
-       {selectedDistrictCode !== '' ? <ButtonOptions geoLevel='district' geoCode={selectedDistrictCode}/> : null}
+      <DropDown urlEnding='all-from-table/?table=countries' geoLevel='country' changeFunction={countryFunction}/>
+      <InteractionPanel selectedGeoLevel='countries' selectedGeoCode={selectedCountryCode}
+       optionsUrlEnding={'regions-from-country/?country-code=' + selectedCountryCode}
+       optionsGeoLevel='regions' areaFunction={regionFunction} />
+      <InteractionPanel selectedGeoLevel='regions' selectedGeoCode={selectedRegionCode}
+       optionsUrlEnding={'districts-from-region/?region-code=' + selectedRegionCode}
+       optionsGeoLevel='districts' areaFunction={districtFunction} />
+       {selectedDistrictCode !== '' ? <ButtonOptions geoLevel='districts' geoCode={selectedDistrictCode}/> : null}
     </div>
   );
 }
