@@ -15,12 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from pages.views import (home_view, all_from_table_view, info_from_area_view, sources_from_info_and_area_view)
+from pages.views import (home_view, all_from_table_view, info_from_area_view,
+                         sources_from_info_and_area_view, regions_from_country_view, districts_from_region_view)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home_view),
     path('all-from-table/', all_from_table_view),
     path('info-from-area/', info_from_area_view),
-    path('sources-from-info-and-area/', sources_from_info_and_area_view)
+    path('sources-from-info-and-area/', sources_from_info_and_area_view),
+    path('regions-from-country/', regions_from_country_view),
+    path('districts-from-region/', districts_from_region_view)
 ]

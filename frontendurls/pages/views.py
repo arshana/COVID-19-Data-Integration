@@ -1,5 +1,5 @@
 import string
-from typing import Dict
+from typing import Dict, Set
 from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import render
 from django.db import connection
@@ -8,8 +8,8 @@ import json
 from sqlalchemy import true
 
 # Create your views here.
-areas:Dict = {'countries', 'regions', 'districts'} # areas that we can attain information
-info_types:Dict = {'cases', 'vaccinations', 'strains', 'population', 'age'} # different types of Covid information
+areas:Set = {'countries', 'regions', 'districts'} # areas that we can attain information
+info_types:Set = {'cases', 'vaccinations', 'strains', 'population', 'age'} # different types of Covid information
 plural_to_singular:Dict = {'countries': 'country', 'regions': 'region', 'districts': 'district'}
 
 # homepage for testing
@@ -87,12 +87,12 @@ def info_from_area_view(request:HttpRequest):
             return HttpResponse(json.dumps(results))
         else:
             return HttpResponseBadRequest('you gave an area or info_type parameter that does not reflect a valid table'
-                                         + 'valid options for areas are ' + str(areas) +
-                                        'and valid options for info_types are' + str(info_types))
+                                         + 'valid options for area are ' + str(areas) +
+                                        'and valid options for info-type are' + str(info_types))
     else:
         return HttpResponseBadRequest("You need to provide an area parameter" 
-        + "and an info_type parameter and an area_code parameter, given area options are " + str(areas) 
-        + " and given info_type options are " + str(info_types))
+        + "and an info-type parameter and given area options are " + str(areas) 
+        + " and given info-type options are " + str(info_types))
 
 # returns all source informatoin for the given area
 # regarding the given info_type 
@@ -142,3 +142,49 @@ def sources_from_info_and_area_view(request:HttpRequest):
         return HttpResponseBadRequest("You need to provide an area parameter" 
         + "and an info_type parameter and an area_code parameter, given area options are " + str(areas) 
         + " and given info_type options are " + str(info_types))
+
+# given either country-name or country-code
+# returns all regions that belong to that country
+# country-name has precedence over country-code
+def regions_from_country_view(request:HttpRequest):
+    if 'country-name' in request.GET:
+        with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM Countries, Regions" 
+                + " WHERE Countries.country_name = %s COLLATE NOCASE" 
+                + " AND Countries.country_code = Regions.country_code", [request.GET['country-name']])
+                columns = [column[0] for column in cursor.description]
+                rows = cursor.fetchall()
+                results = []
+                for row in rows:
+                    results.append(dict(zip(columns, row)))
+                return HttpResponse(json.dumps(results))
+    elif 'country-code' in request.GET:
+        with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM Countries, Regions" 
+                + " WHERE Countries.country_code = %s COLLATE NOCASE" 
+                + " AND Countries.country_code = Regions.country_code", [request.GET['country-code']])
+                columns = [column[0] for column in cursor.description]
+                rows = cursor.fetchall()
+                results = []
+                for row in rows:
+                    results.append(dict(zip(columns, row)))
+                return HttpResponse(json.dumps(results))
+    else:
+        return HttpResponseBadRequest('you must give either a country-code or a country-name for this function to work')
+
+# given a region-code
+# returns all districts that belong to that region
+def districts_from_region_view(request:HttpRequest):
+    if 'region-code' in request.GET:
+        with connection.cursor() as cursor:
+                cursor.execute("SELECT * FROM Regions, Districts" 
+                + " WHERE Regions.region_code = %s COLLATE NOCASE" 
+                + " AND Regions.region_code = Districts.region_code", [request.GET['region-code']])
+                columns = [column[0] for column in cursor.description]
+                rows = cursor.fetchall()
+                results = []
+                for row in rows:
+                    results.append(dict(zip(columns, row)))
+                return HttpResponse(json.dumps(results))
+    else:
+        return HttpResponseBadRequest('you must give a region-code for this function to work')
