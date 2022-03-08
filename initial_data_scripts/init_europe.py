@@ -9,9 +9,90 @@ sys.path.append("..")
 
 from util import *
 
-# Use this for European countries only. Other countries appear to be either unreliable or have a lot of holes in their data.
 def init_jrc():
-    df = pd.read_csv('https://raw.githubusercontent.com/ec-jrc/COVID-19/master/data-by-region/jrc-covid-19-all-days-by-regions.csv', error_bad_lines=False)
+    conn = sqlite3.connect('sqlite_db')
+    c = conn.cursor()
+
+    src_url = "https://github.com/ec-jrc/COVID-19"
+    set_source(src_url, c, conn)
+    src_id = get_source_id(src_url, c)
+
+    init_jrc_countries(src_id, c, conn)
+    c.close()
+
+# Use this for European countries only. Other countries appear to be either unreliable or have a lot of holes in their data.
+# Using this in addition to JHU data, because it includes hospitalization data, while JHU does not
+def init_jrc_countries(src_id, c, conn):
+    df = pd.read_csv('https://raw.githubusercontent.com/ec-jrc/COVID-19/master/data-by-country/jrc-covid-19-all-days-by-country.csv', error_bad_lines=False)
+
+    prev_death_dict = {}
+    prev_recovered_dict = {}
+    prev_cases_dict = {}
+
+    missing_countries_set = set(())  # used to keep track of any countries that might need to be added to the countries table - for debugging purposes
+
+    # Certain countries have strange data, regardless of if they are in the EU or not. This set has includes country names that don't seem to have that strange pattern.
+    acceptable_countries_set = set(("Germany", "United Kingdom", "Italy", "Spain", "Romania", "Netherlands", "Belgium", "Sweden", "Austria", "Switzerland", "Slovakia", "Norway", "Albania"))  
+
+    dt = datetime.datetime(2020, 2, 28)
+    end_dt = datetime.datetime.today() + datetime.timedelta(days=1)
+    while(dt != end_dt):
+        try:
+            date = str(dt.year) + ('0' if dt.month < 10 else '') + str(dt.month) + ('0' if dt.day < 10 else '') + str(dt.day)
+            csv = "https://raw.githubusercontent.com/ec-jrc/COVID-19/master/data-by-country/jrc-covid-19-countries-" + date + ".csv"
+            df = pd.read_csv(csv)
+            for row in df.itertuples():
+                if row.EUcountry is True and row.CountryName in acceptable_countries_set:
+                    country_code = get_country_code(row.CountryName, c)
+                    
+                    if country_code == None:
+                        missing_countries_set.add(row.CountryName)
+                    # ('RO', '2020-04-23', 1, 0, 0, 0, 0)
+                    else:
+                        sql = '''SELECT date_collected FROM Cases_Per_Country WHERE date_collected = ? AND source_id = ? AND country_code = ?'''
+                        c.execute(sql, (row.Date, src_id, country_code))
+                        already_entered = c.fetchall() != []
+                        if not already_entered:
+                            prev_death = 0 if country_code not in prev_death_dict else prev_death_dict[country_code]
+                            prev_recovered = 0 if country_code not in prev_recovered_dict else prev_recovered_dict[country_code]
+                            prev_cases = 0 if country_code not in prev_cases_dict else prev_cases_dict[country_code]
+
+                            deaths = (row.CumulativeDeceased - prev_death) if isNum(row.CumulativeDeceased) else None
+                            cases = (row.CumulativePositive - prev_cases) if isNum(row.CumulativePositive) else None
+                            recovered = (row.CumulativeRecovered - prev_recovered) if isNum(row.CumulativeRecovered) else None
+                            hospitalized = int(row.Hospitalized) if isNum(row.Hospitalized) else None
+                            
+                            sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers, hospitalization_numbers) VALUES (?, ?, ?, ?, ?, ?, ?)'''
+                            c.execute(sql,(country_code, row.Date, src_id, deaths, cases, recovered, hospitalized))
+                            
+                            if isNum(row.CumulativeDeceased):
+                                prev_death_dict[country_code] = row.CumulativeDeceased
+                            if isNum(row.CumulativeRecovered):
+                                prev_recovered_dict[country_code] = row.CumulativeRecovered
+                            if isNum(row.CumulativePositive):
+                                prev_cases_dict[country_code] = row.CumulativePositive
+                        else:
+                            print(row.date + " " + country_code)
+            
+            conn.commit()
+        except:
+            pass
+        dt += datetime.timedelta(days=1)
+        print(csv)
+
+    # debugging
+    #print(missing_countries_set)
+
+    with open('jrc_countries.json', 'w') as f:
+        f.write(json.dumps(prev_death_dict)+'\n')
+        f.write(json.dumps(prev_recovered_dict)+'\n')
+        f.write(json.dumps(prev_cases_dict)+'\n')
+        f.close()
+
+
+def init_jrc_regions(src_id, c, conn):
+    pass
+
 
 # JRC includes Italy data, but not the same subsets
 def init_italy():
@@ -19,7 +100,7 @@ def init_italy():
     df_region = pd.read_csv('https://raw.githubusercontent.com/RamiKrispin/covid19Italy/master/csv/italy_region.csv', error_bad_lines=False)
     df_subregion = pd.read_csv('https://raw.githubusercontent.com/RamiKrispin/covid19Italy/master/csv/italy_province.csv', error_bad_lines=False)
 
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     # get country_code
@@ -36,10 +117,10 @@ def init_italy():
         prev_death = 0 if "death" not in prev_row else prev_row["death"]
         prev_recovered = 0 if "recovered" not in prev_row else prev_row["recovered"]
         sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers, hospitalization_numbers) VALUES (?, ?, ?, ?, ?, ?, ?)'''
-        c.execute(sql,(italy_code, row.date, italy_src, row.death - prev_death if row.death is not "NaN" else None, int(row.daily_positive_cases) if row.daily_positive_cases is not "NaN" else None, row.recovered - prev_recovered if row.recovered is not "NaN" else None, int(row.total_hospitalized) if row.total_hospitalized is not "NaN" else None))
-        if row.death is not "NaN":
+        c.execute(sql,(italy_code, row.date, italy_src, (row.death - prev_death) if isNum(row.death) else None, int(row.daily_positive_cases) if isNum(row.daily_positive_cases) else None, (row.recovered - prev_recovered) if isNum(row.recovered) else None, int(row.total_hospitalized) if isNum(row.total_hospitalized) else None))
+        if isNum(row.death):
             prev_row["death"] = row.death
-        if row.recovered is not "NaN":
+        if isNum(row.recovered):
             prev_row["recovered"] = row.recovered
     conn.commit()
     
@@ -56,10 +137,10 @@ def init_italy():
         prev_death = 0 if region_code not in prev_death_dict else prev_death_dict[region_code]
         prev_recovered = 0 if region_code not in prev_recovered_dict else prev_recovered_dict[region_code]
         sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers, hospitalization_numbers) VALUES (?, ?, ?, ?, ?, ?, ?)'''
-        c.execute(sql,(region_code, row.date, italy_src, row.death - prev_death if row.death is not "NaN" else None, int(row.daily_positive_cases) if row.daily_positive_cases is not "NaN" else None, row.recovered - prev_recovered if row.recovered is not "NaN" else None, int(row.total_hospitalized) if row.total_hospitalized is not "NaN" else None))
-        if row.death is not "NaN":
+        c.execute(sql,(region_code, row.date, italy_src, (row.death - prev_death) if isNum(row.death) else None, int(row.daily_positive_cases) if isNum(row.daily_positive_cases) else None, (row.recovered - prev_recovered) if isNum(row.recovered) else None, int(row.total_hospitalized) if isNum(row.total_hospitalized) else None))
+        if isNum(row.death):
             prev_death_dict[region_code] = row.death
-        if row.recovered is not "NaN":
+        if isNum(row.recovered):
             prev_recovered_dict[region_code] = row.recovered
     conn.commit()
 
@@ -92,7 +173,7 @@ def init_italy():
 
 # Starts on 03/03/2020.
 def init_ukraine():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     # get country_code for Ukraine

@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'frontendurls.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '../prototype_db',
+        'NAME': '../sqlite_db',
     }
 }
 

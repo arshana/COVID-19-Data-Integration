@@ -1,3 +1,5 @@
+import pandas as pd
+
 # Get country code associated with country_name from Countries table.
 def get_country_code(country_name, c):
   c.execute('SELECT country_code FROM Countries WHERE country_name = "' + country_name + '"')
@@ -31,3 +33,6 @@ def set_source(source_info, c, conn):
     c.execute("INSERT INTO Sources (source_information) VALUES('" + source_info + "');")
     conn.commit()
 
+# Check if a value is a number
+def isNum(value):
+  return (value is not None) and (not pd.isna(value)) and (str(value).lower() != "nan")

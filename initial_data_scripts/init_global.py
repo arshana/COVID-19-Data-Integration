@@ -7,7 +7,7 @@ import json
 from util import *
 
 def init_jhu():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
 
     # insert and get source id for source
@@ -60,15 +60,15 @@ def init_jhu_us_states(c, conn, src_id):
                 if region_code is not None:
                     sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers, hospitalization_numbers) VALUES (?, ?, ?, ?, ?, ?, ?)'''
                     # handles the case of a blank column by inserting None
-                    c.execute(sql,(region_code, date, src_id, row.Deaths - prev_death if row.Deaths is not None else None, row.Confirmed - prev_case if row.Confirmed is not None else None, row.Recovered - prev_recovered if row.Recovered is not None else None, row.People_Hospitalized - prev_hospitalized if row.People_Hospitalized is not None else None))
+                    c.execute(sql,(region_code, date, src_id, (row.Deaths - prev_death) if isNum(row.Deaths) else None, (row.Confirmed - prev_case) if isNum(row.Confirmed) else None, (row.Recovered - prev_recovered) if isNum(row.Recovered) else None, (row.People_Hospitalized - prev_hospitalized) if isNum(row.People_Hospitalized) else None))
                     # update previous
-                    if row.Deaths is not None:
+                    if isNum(row.Deaths):
                         prev_death_dict[region_code] = row.Deaths
-                    if row.Recovered is not None:
+                    if isNum(row.Recovered):
                         prev_recovered_dict[region_code] = row.Recovered
-                    if row.Confirmed is not None:
+                    if isNum(row.Confirmed):
                         prev_case_dict[region_code] = row.Confirmed
-                    if row.People_Hospitalized is not None:
+                    if isNum(row.People_Hospitalized):
                         prev_hospitalized_dict[region_code] = row.People_Hospitalized
                 else:
                     last_error = (row.Province_State + " was missing from the Regions table - init_jhu_us_states " + csv_name + ".")
@@ -181,13 +181,13 @@ def init_jhu_global(c, conn, src_id):
                         prev_case = 0 if country_code not in prev_case_dict else prev_case_dict[country_code]
                         sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
                         # handles the case of a blank column by inserting None
-                        c.execute(sql,(country_code, date, src_id, row.Deaths - prev_death if row.Deaths is not None else None, row.Confirmed - prev_case if row.Confirmed is not None else None, row.Recovered - prev_recovered if row.Recovered is not None else None))
+                        c.execute(sql,(country_code, date, src_id, (row.Deaths - prev_death) if isNum(row.Deaths) else None, (row.Confirmed - prev_case) if isNum(row.Confirmed) else None, (row.Recovered - prev_recovered) if isNum(row.Recovered) else None))
                         # update previous
-                        if row.Deaths is not None:
+                        if isNum(row.Deaths):
                             prev_death_dict[country_code] = row.Deaths
-                        if row.Recovered is not None:
+                        if isNum(row.Recovered):
                             prev_recovered_dict[country_code] = row.Recovered
-                        if row.Confirmed is not None:
+                        if isNum(row.Confirmed):
                             prev_case_dict[country_code] = row.Confirmed
                     elif (region_name != "Recovered" and region_name != "Unknown"):   # a region-level entry
                         # skip Recovered row - irrelevant data - be on the look out for other special cases that haven't been noticed yet
@@ -208,13 +208,13 @@ def init_jhu_global(c, conn, src_id):
                             prev_case = 0 if region_code not in prev_case_dict else prev_case_dict[region_code]
                             sql = '''INSERT INTO Cases_Per_Region (region_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
                             # handles the case of a blank column by inserting None
-                            c.execute(sql,(region_code, date, src_id, row.Deaths - prev_death if row.Deaths is not None else None, row.Confirmed - prev_case if row.Confirmed is not None else None, row.Recovered - prev_recovered if row.Recovered is not None else None))
+                            c.execute(sql,(region_code, date, src_id, (row.Deaths - prev_death) if isNum(row.Deaths) else None, (row.Confirmed - prev_case) if isNum(row.Confirmed) else None, (row.Recovered - prev_recovered) if isNum(row.Recovered) else None))
                             # update previous
-                            if row.Deaths is not None:
+                            if isNum(row.Deaths):
                                 prev_death_dict[region_code] = row.Deaths
-                            if row.Recovered is not None:
+                            if isNum(row.Recovered):
                                 prev_recovered_dict[region_code] = row.Recovered
-                            if row.Confirmed is not None:
+                            if isNum(row.Confirmed):
                                 prev_case_dict[region_code] = row.Confirmed
                         elif (subregion_name != "Unassigned"):
                             subregion_code = get_district_code(region_code, str(subregion_name), c)
@@ -229,13 +229,13 @@ def init_jhu_global(c, conn, src_id):
                             prev_case = 0 if subregion_code not in prev_case_dict_subregion else prev_case_dict_subregion[subregion_code]
                             sql = '''INSERT INTO Cases_Per_District (district_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
                             # handles the case of a blank column by inserting None
-                            c.execute(sql,(subregion_code, date, src_id, row.Deaths - prev_death if row.Deaths is not None else None, row.Confirmed - prev_case if row.Confirmed is not None else None, row.Recovered - prev_recovered if row.Recovered is not None else None))
+                            c.execute(sql,(subregion_code, date, src_id, (row.Deaths - prev_death) if isNum(row.Deaths) else None, (row.Confirmed - prev_case) if isNum(row.Confirmed) else None, (row.Recovered - prev_recovered) if isNum(row.Recovered) else None))
                             # update previous
-                            if row.Deaths is not None:
+                            if isNum(row.Deaths):
                                 prev_death_dict_subregion[subregion_code] = row.Deaths
-                            if row.Recovered is not None:
+                            if isNum(row.Recovered):
                                 prev_recovered_dict_subregion[subregion_code] = row.Recovered
-                            if row.Confirmed is not None:
+                            if isNum(row.Confirmed):
                                 prev_case_dict_subregion[subregion_code] = row.Confirmed
 
             conn.commit()   # runs after every csv
@@ -248,7 +248,8 @@ def init_jhu_global(c, conn, src_id):
         dt += datetime.timedelta(days=1)
 
     # debugging
-    #print(missing_countries_set)
+    # print(missing_countries_set)
+
     with open('jhu_global.json', 'w') as f:
         f.write(json.dumps(prev_death_dict)+'\n')
         f.write(json.dumps(prev_recovered_dict)+'\n')

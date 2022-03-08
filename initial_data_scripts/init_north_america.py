@@ -24,7 +24,7 @@ def toint(s):
 
 #add country and county level case data and vaccination data for country and state
 def init_us():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     
@@ -130,7 +130,7 @@ def init_us():
     conn.commit()
 
 def init_canada():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     # get country_code for Canada
@@ -212,7 +212,7 @@ def init_canada():
     conn.commit()
 
 def init_guatemala():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     # get country_code for Guatemala
