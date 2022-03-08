@@ -59,9 +59,12 @@ def init_us():
     for i in range(0,len(result)):
         region_dict[result[i][1]] = result[i][0]
         county_dict[result[i][1]] = {}
-    #insert county code and data
-  
+        c.execute("Select *  from Districts Where region_code = " + str(region_dict[result[i][1]]))
+        result1 = c.fetchall()
+        for j in range(0, len(result1)):
+            county_dict[result[i][1]][result1[j][1]] = result1[j][0]
     
+    #insert county code and data
     for index, row in us_county.iterrows():
         state = row["state"]
         county = row["county"]
@@ -77,7 +80,6 @@ def init_us():
         sql = '''INSERT INTO Cases_Per_District (district_code, date_collected, source_id, death_numbers, case_numbers) VALUES (?, ?, ?, ?, ?)'''
         c.execute(sql,(county_dict[state][county], row["date"], us_src, row["deaths"], row["cases"]))
     conn.commit()
-    print(county_dict)
     
     #get and insert population data
     abb = {}
@@ -145,8 +147,15 @@ def init_canada():
     ca_v = pd.read_csv("https://health-infobase.canada.ca/src/data/covidLive/vaccination-coverage-map.csv")
     ca_s = pd.read_csv("https://health-infobase.canada.ca/src/data/covidLive/covid19-epiSummary-variants.csv")
     
-    #insert country and region case data
     region_dict = {}
+    c.execute("SELECT region_code, region_name from Regions Where country_code = 'CA'")
+    result = c.fetchall()
+
+    for i in range(0,len(result)):
+        region_dict[result[i][1]] = result[i][0]
+        
+    #insert country and region case data
+    
     for index, row in ca_case.iterrows():
         region = row["prname"]
         case = row["numconf"]
@@ -223,16 +232,12 @@ def init_guatemala():
     set_source(gu_src_url, c, conn)
     gu_src = get_source_id(gu_src_url, c)
     
-    v_src = "https://github.com/owid/covid-19-data"
-    set_source(v_src, c, conn)
-    v_src = get_source_id(v_src, c)
-    
+
     gu_death = pd.read_csv("https://gtmvigilanciacovid.shinyapps.io/1GEAxasgYEyITt3Y2GrQqQFEDKW89fl9/_w_0d14592e/session/1f0e3b3486ac8317dfaad7a0be3f8481/download/fallecidosFF?w=0d14592e")
     gu_case = pd.read_csv("https://gtmvigilanciacovid.shinyapps.io/1GEAxasgYEyITt3Y2GrQqQFEDKW89fl9/_w_0d14592e/session/1f0e3b3486ac8317dfaad7a0be3f8481/download/confirmadosFER?w=0d14592e")
-    gu_v = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/country_data/Guatemala.csv")
-    gu = pd.merge(gu_case, gu_death, on=["departamento", "municipio"])
-    
 
+    
+    gu = pd.merge(gu_case, gu_death, on=["departamento", "municipio"])
     #insert district case data and population data for guatemala
     region_dict = {}
     city_dict = {}
@@ -258,10 +263,4 @@ def init_guatemala():
                     c.execute(sql,(city_dict[region][city], date1, gu_src, death, case))
             sql = '''INSERT INTO Population_Per_District (district_code, population_amount, date_collected) VALUES (?, ?, ?)'''
             c.execute(sql,(city_dict[region][city], check(row["poblacion_x"]), date.today()))
-    conn.commit()
-    
-    #insert vaccination country data for guatemala
-    for index, row in gu_v.iterrows():
-        sql = '''INSERT INTO Vaccinations_Per_Country (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, country_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
-        c.execute(sql, (row["date"], toint(row["people_vaccinated"]), toint(row["people_fully_vaccinated"]), toint(row["total_boosters"]), gu_code, v_src))
     conn.commit()

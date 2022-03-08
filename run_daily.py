@@ -16,7 +16,21 @@
 
 from daily_data_scripts.daily_europe import daily_italy, daily_ukraine
 from daily_data_scripts.daily_global import daily_jhu
+from daily_data_scripts.daily_north_america import update_us, update_canada, update_guatemala
+from daily_data_scripts.daily_south_america import update_brazil
+from daily_data_scripts.daily_global_v import update_global_v
+from daily_data_scripts.daily_asia import update_japan, update_korea, update_ina, update_china, update_india
 
 daily_italy()
 daily_ukraine()
 daily_jhu()
+update_brazil()
+update_us()
+update_canada()
+update_guatemala()
+update_japan()
+update_korea()
+update_ina()
+update_china()
+update_india()
+update_global_v()

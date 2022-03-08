@@ -17,7 +17,7 @@ def toint(s):
     return s
 
 def init_brazil():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     # get country_code for brazil
@@ -34,6 +34,11 @@ def init_brazil():
     #insert country, state case  vaccination data 
     region_dict = {}
     city_dict = {}
+    c.execute("SELECT region_code, region_name from Regions Where country_code = 'BR'")
+    result = c.fetchall()
+    for i in range(0,len(result)):
+        region_dict[result[i][1]] = result[i][0]
+        city_dict[result[i][1]] = {}
     for index, row in br.iterrows():
         region = row["state"]
         case = row["newDeaths"]

@@ -270,7 +270,7 @@ def update_japan():
     conn.commit()
     c.close()
 
-def ina():
+def update_india():
     conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     

@@ -31,6 +31,11 @@ def toint1(s):
         s = int(s)
     return s
 
+def toNum(s):
+    if pd.isna(s):
+        s = 0
+    return s
+
 def init_japan():
     conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
@@ -52,12 +57,6 @@ def init_japan():
     japan_age = pd.read_csv("https://covid19.mhlw.go.jp/public/opendata/newly_confirmed_cases_detail_weekly.csv")
     japan_all = pd.merge(japan, japan_death, on=["Date"])
     
-    #insert regions tables 
-    for col in japan.columns:
-        sql = '''INSERT INTO Regions (region_name, country_code) VALUES (?, ?)'''
-        if col != "Date" and col != "ALL":
-            c.execute(sql,(col, japan_code))
-    conn.commit()
     
     #insert daily data for Japan
     for row in japan_all.itertuples(index=True, name='Pandas'):
@@ -66,13 +65,23 @@ def init_japan():
     conn.commit()
     
     #get region_code for Japan city
+    region_dict = {} 
     c.execute("SELECT region_code, region_name from Regions Where country_code = 'JP'")
     result = c.fetchall()
-    japan_region = []
-    region_dict = {}
     for i in range(0,len(result)):
-        japan_region.append([result[i][0], result[i][1] + "_x", result[i][1] + "_y"])
         region_dict[result[i][1]] = result[i][0]
+        
+    #insert regions tables
+    japan_region = []
+    for col in japan.columns:
+        if col != "Date" and col != "ALL":
+            if col not in region_dict:
+                sql = '''INSERT INTO Regions (region_name, country_code) VALUES (?, ?)'''            
+                c.execute(sql,(col, japan_code))
+                region_dict[col] = get_region_code(region_code, city, c)
+            japan_region.append([region_dict[col], col + "_x", col + "_y"])  
+            
+    conn.commit()
 
     #insert region daily case data
     for index, row in japan_all.iterrows():
@@ -344,10 +353,10 @@ def init_ina():
     result = c.fetchall()
     for index, row in ina_age_nation.iterrows():
         if row["Category"] == "kelompok_umur":
-            case = round(row["kasus"] * result[0][4] / 100)
-            recovery = round(row["sembuh"] * result[0][5] / 100)
-            hos = round(row["perawatan"] * result[0][6] / 100)
-            death = round(row["meninggal"] * result[0][3] / 100)
+            case = round(toNum(row["kasus"]) * result[0][4] / 100)
+            recovery = round(toNum(row["sembuh"]) * result[0][5] / 100)
+            hos = round(toNum(row["perawatan"]) * result[0][6] / 100)
+            death = round(toNum(row["meninggal"]) * result[0][3] / 100)
             sql = '''INSERT INTO Age_Per_Country (date_collected, country_code, source_id, age_group, case_number, recovery_number, hospitalization_number, death_number) VALUES (?, ?, ?, ?, ?, ?, ? ,?)'''
             c.execute(sql,(row["Date"], ina_code,  ina_src, row["SubCategory"], case, recovery, hos, death))
     conn.commit()  
@@ -362,10 +371,10 @@ def init_ina():
     for index, row in ina_age_city.iterrows():
         if row["Category"] == "kelompok_umur":
             result = region_data[row["Location"]]
-            case = round(row["kasus"] * result[1] / 100)
-            recovery = round(row["sembuh"] * result[2] / 100)
-            hos = round(row["perawatan"] * result[3] / 100)
-            death = round(row["meninggal"] * result[0] / 100)
+            case = round(toNum(row["kasus"]) * result[1] / 100)
+            recovery = round(toNum(row["sembuh"]) * result[2] / 100)
+            hos = round(toNum(row["perawatan"]) * result[3] / 100)
+            death = round(toNum(row["meninggal"]) * result[0] / 100)
             sql = '''INSERT INTO Age_Per_Region (date_collected, region_code, source_id, age_group, case_number, recovery_number, hospitalization_number, death_number) VALUES (?, ?, ?, ?, ?, ?, ? ,?)'''
             c.execute(sql,(row["Date"], region_dict[row["Location"]],  ina_src, row["SubCategory"], case, recovery, hos, death))
     conn.commit()
@@ -411,16 +420,17 @@ def init_india():
     set_source(ind_src_url, c, conn)
     ind_src = get_source_id(ind_src_url, c)
     
-    v_src = "https://github.com/owid/covid-19-data"
-    #set_source(v_src, c, conn)
-    v_src = get_source_id(v_src, c)
-    
     ind_case = pd.read_csv("https://prsindia.org/covid-19/cases/download")
     ind_v = pd.read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/vaccinations/country_data/India.csv")
-
+    
+    region_dict = {}
+    c.execute("SELECT region_code, region_name from Regions Where country_code = 'IN'")
+    result = c.fetchall()
+    for i in range(0,len(result)):
+        region_dict[result[i][1]] = result[i][0]
+    
     #inser country, region case data for india
     lastRegion = ""
-    region_dict = {}
     for index,row in ind_case.iterrows():
         region = row["Region"]
         if region != lastRegion:
@@ -453,17 +463,9 @@ def init_india():
     sql = '''INSERT INTO Population_Per_Country (country_code, population_amount, date_collected) VALUES (?, ?, ?)'''
     c.execute(sql,(ind_code, 1352642280, datetime.datetime(2019, 11, 9).date()))
     conn.commit()
-    
-    
-    #insert vaccination country data for guatemala
-    for index, row in ind_v.iterrows():
-        sql = '''INSERT INTO Vaccinations_Per_Country (date_collected, first_vaccination_number, second_vaccination_number,  third_vaccination_number, country_code, source_id) VALUES (?, ?, ?, ?, ?, ?)'''
-        c.execute(sql, (row["date"], toint(row["people_vaccinated"]), toint(row["people_fully_vaccinated"]), toint(row["total_boosters"]), ind_code, v_src))
-    conn.commit()
 
-#slow to run
 def init_china():
-    conn = sqlite3.connect('prototype_db')
+    conn = sqlite3.connect('sqlite_db')
     c = conn.cursor()
     
     # get country_code for china
@@ -479,18 +481,24 @@ def init_china():
     link = "https://github.com/BlankerL/DXY-COVID-19-Data/releases/download/" + date1 + "/DXYArea.csv"
     cn_case = pd.read_csv(link)
     
-    #insert country, region and distrct case data for china
     region_dict = {}
     city_dict = {}
+    c.execute("SELECT region_code, region_name from Regions Where country_code = 'CN'")
+    result = c.fetchall()
+    for i in range(0,len(result)):
+        region_dict[result[i][1]] = result[i][0]
+        city_dict[result[i][1]] = {}
+    #insert country, region and distrct case data for china 
     check = {}
     for index,row in cn_case.iterrows():
-        region = row["countryEnglishName"]
-        if region == "China":
+        country = row["countryEnglishName"]
+        if country == "China":
             case = row["province_confirmedCount"]
             death = row["province_deadCount"]
             recover = row["province_curedCount"]
             date1 = row["updateTime"][:10]
-            if row["provinceEnglishName"] == "China":
+            region = row["provinceEnglishName"]
+            if region == "China":
                 sql = '''INSERT INTO Cases_Per_Country (country_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
                 c.execute(sql,(cn_code, date1, cn_src, death, case, recover))
             else:
@@ -507,15 +515,16 @@ def init_china():
                     check[date1].add(region)
                 if (pd.isna(row["cityEnglishName"]) ==  False):
                     city = row["cityEnglishName"]
-                    if city not in region_dict:
+                    if city not in city_dict[region]:
                         sql = '''INSERT INTO Districts (district_name, region_code) VALUES (?, ?)'''
                         c.execute(sql,(city, region_dict[region]))
                         city_dict[region][city] = get_district_code(region_dict[region], city, c)
                     sql = '''INSERT INTO Cases_Per_District (district_code, date_collected, source_id, death_numbers, case_numbers, recovery_numbers) VALUES (?, ?, ?, ?, ?, ?)'''
                     c.execute(sql,(city_dict[region][city], date1, cn_src, row["city_deadCount"], row["city_confirmedCount"], row["city_curedCount"]))
     conn.commit()
-
+    
     #insert population data for china
     sql = '''INSERT INTO Population_Per_Country (country_code, population_amount, date_collected) VALUES (?, ?, ?)'''
     c.execute(sql,(cn_code,  1412600000, datetime.datetime(2021, 5, 1).date()))
     conn.commit()
+            
