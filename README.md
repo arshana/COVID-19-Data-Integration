@@ -5,6 +5,34 @@ Code for integrating COVID-19 data from various sources. Includes subnational da
 
 This covers everything related to setting up the database and getting data into the database.
 
+### Initial Database Setup
+
+The database is currently set up with SQLite and is stored in a Github repository. To initialize it, we ran `python run_main_initially.py`. This initialized the sqlite_db, added the tables, and inserted all the data in the data sources at the time of initialization.
+
+This script should never be run again unless you are restarting the database from scratch. There is no guarantee the script will still be up-to-date or that it will account for any new edge cases that have developed over time.
+
+### Daily Database Update
+
+Run the following command daily: `python run_daily.py`.
+
+This script will pull the new data from the data sources into the database. Be on the lookout for errors as new edge cases may develop over time!
+
+run_daily.py contains imports functions from a variety of other python files. There is typically one function run for every still-current data source. The functions have links to their source that you may wish to access if you are using the data or if the functions need modifications to fit your needs.
+
+Essentially, you will need to do the following on a daily basis:
+1. Pull from this repo: `git pull`.
+2. Run `python run_daily.py`.
+3. Commit the changes: `git commit -m "Update db <date>"`.
+4. Push to this repo: `git push`.
+
+### Using the Database
+
+There are a couple of ways to use the database:
+
+1. Use the frontend to get a JSON containing the data. Then import that JSON structure into another application (i.e. Excel) and further manipulate it. Refer to the Frontend section below for a better understanding of how you might use this method.
+2. Run SQL queries on the data manually.
+3. Use some combination of options 1 and 2 above. (For example, you might use the frontend to easily determine the district code you are looking for and then run a SQL query with that district code manually, instead of having to use multiple joins in the SQL query to figure out the desired district code.)
+
 ### Database Structure
 
 The database is in SQLite and is called sqlite_db.
@@ -86,19 +114,5 @@ This is similar to `Age_Per_Country`, but for regions.
 #### Age_Per_District
 
 This is similar to `Age_Per_Country`, but for districts.
-
-### Initial Database Setup
-
-The database is currently set up with SQLite and is stored in a Github repository. To initialize it, we ran `python run_main_initially.py`. This initialized the sqlite_db, added the tables, and inserted all the data in the data sources at the time of initialization.
-
-This script should never be run again unless you are restarting the database from scratch. There is no guarantee the script will still be up-to-date or that it will account for any new edge cases that have developed over time.
-
-### Daily Database Update
-
-Run the following command daily: `python run_daily.py`.
-
-This script will pull the new data from the data sources into the database. Be on the lookout for errors as new edge cases may develop over time!
-
-run_daily.py contains imports functions from a variety of other python files. There is typically one function run for every still-current data source. The functions have links to their source that you may wish to access if you are using the data or if the functions need modifications to fit your needs.
 
 ## Frontend
