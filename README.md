@@ -47,11 +47,41 @@ This is similar to `Cases_Per_Country`, but for districts.
 
 #### Vaccinations_Per_Country
 
+This table includes the `country_code` and data associated with vaccinations: `source_id`, `date_collected`, `first_vaccination_number`, `second_vaccination_number`, and `third_vaccination_number`. The vaccination numbers are basically the number of people who got their ith vaccination.
+
+_Ivy, is this cumulative? or daily?_
+
 #### Vaccinations_Per_Region
+
+This is similar to `Vaccinations_Per_Country`, but for regions.
 
 #### Vaccinations_Per_District
 
+This is similar to `Vaccinations_Per_Country`, but for districts.
 
+#### Population_Per_Country
+
+This table includes the `country_code` and population of that country on a certain date: `date_collected` and `population_amount`.
+
+The intention behind this table is to give users something to aggregate and manipulate data in other tables with. For instance, we number of deaths in the `Cases_Per_Country` table. But what if you wanted to know the percentage of deaths instead? This table would help with that. Unfortunately, this table is not exact and must be intentionally updated by a user. Population censuses are not taken often, so this data can't be used to determine exact percentages, only approximations. Regardless, we felt having a framework in place to help with such calculations would be useful.
+
+#### Population_Per_Region
+
+This is similar to `Population_Per_Country`, but for regions. Note that this population data will likely be more difficult to find than for countries.
+
+#### Population_Per_District
+
+This is similar to `Population_Per_Country`, but for districts. Note that this population data will likely be more difficult to find than for countries.
+
+#### Age_Per_Country
+
+This table is similar to `Cases_Per_Country` but has data divided based on ages as well. Also, unlike with `Cases_Per_Country`, different sources provided information in numbers or rates, so both versions are included in the table. The attributes include the `country_code` and the age-based COVID-19 data: `source_id`, `date_collected`, `age_group`, `death_number`, `case_number`, `recovery_number`, `hospitalization_number`, `death_rate`, `case_rate`, `recovery_rate`, and `hospitalization_rate`. 
+
+Because age-based data is so comparatively rare, we included it in a separate table from the more general `Cases_Per_Country` table. The `age_group` attribute has data type VARCHAR(64). It is up to the person inserting the data to define what they want to put here and document it.
+
+#### Age_Per_Region
+
+#### Age_Per_District
 
 ### Initial Database Setup
 
