@@ -9,9 +9,7 @@ This covers everything related to setting up the database and getting data into 
 
 The database is in SQLite and is called sqlite_db.
 
-When this database was designed, a variety of tables were included in the schema (data/OverallSchema.sql). However, not all these tables were necessary or used during the initial database setup, and so some of them were not created in run_main_initially.py. Those tables should still work well with the structure, however. So if they every do become useful or relevant, it should be straightforward to add them to the database.
-
-At this point, all tables were added through the run_main_initially.py file, which you can refer to for a better understanding of all the attributes of the tables.
+When this database was designed, we intended to use SQLServer with Azure Data Factory, so we included the schema in data/OverallSchema.sql. However, due to time constraints, we switched to a SQLite implementation. So at this point, all tables were added through the run_main_initially.py file, which you can refer to for a better understanding of all the attributes of the tables. (This means that everything in the data folder is technically legacy code, but we haven't removed it in case it helps with an eventual migration to SQLServer.)
 
 Here is an overview of the tables and their contents.
 
@@ -46,6 +44,8 @@ This is similar to `Cases_Per_Country`, but for regions.
 #### Cases_Per_District
 
 This is similar to `Cases_Per_Country`, but for districts.
+
+#### Vaccinations
 
 ### Initial Database Setup
 
