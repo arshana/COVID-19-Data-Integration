@@ -15,37 +15,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from pages.views import (countries_view, home_view, country_cases_view, country_regions_view,
-                         region_cases_view, region_districts_view, district_cases_view, country_districts_cases_view,
-                         country_regions_cases_view, region_districts_cases_view, region_vaccination_view,
-                         sources_view, country_vaccination_view, district_vaccination_view,
-                         country_strain_view, region_strain_view, district_strain_view,
-                         country_population_view, region_population_view, district_population_view,
-                         country_ages_view, region_ages_view, district_ages_view)
+from pages.views import (home_view, all_from_table_view, info_from_area_view, sources_from_info_and_area_view)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('countries/', countries_view),
     path('', home_view),
-    path('country-cases/', country_cases_view),
-    path('country-regions-cases/', country_regions_cases_view),
-    path('region-cases/', region_cases_view),
-    path('country-districts-cases/', country_districts_cases_view),
-    path('region-districts/', region_districts_cases_view),
-    path('district-cases/', district_cases_view),
-    path('country-regions/', country_regions_view),
-    path('region-districts/', region_districts_view),
-    path('country-vaccinations/', country_vaccination_view),
-    path('region-vaccinations/', region_vaccination_view),
-    path('district-vaccinations/', district_vaccination_view),
-    path('country-strains/', country_strain_view),
-    path('region-strains/', region_strain_view),
-    path('district-strains/', district_strain_view),
-    path('country-population/', country_population_view),
-    path('region-population/', region_population_view),
-    path('district-population/', district_population_view),
-    path('country-ages/', country_ages_view),
-    path('region-ages/', region_ages_view),
-    path('district-ages/', district_ages_view),
-    path('sources/', sources_view)
+    path('all-from-table/', all_from_table_view),
+    path('info-from-area/', info_from_area_view),
+    path('sources-from-info-and-area/', sources_from_info_and_area_view)
 ]
