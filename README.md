@@ -45,7 +45,13 @@ This is similar to `Cases_Per_Country`, but for regions.
 
 This is similar to `Cases_Per_Country`, but for districts.
 
-#### Vaccinations
+#### Vaccinations_Per_Country
+
+#### Vaccinations_Per_Region
+
+#### Vaccinations_Per_District
+
+
 
 ### Initial Database Setup
 
