@@ -81,7 +81,11 @@ Because age-based data is so comparatively rare, we included it in a separate ta
 
 #### Age_Per_Region
 
+This is similar to `Age_Per_Country`, but for regions.
+
 #### Age_Per_District
+
+This is similar to `Age_Per_Country`, but for districts.
 
 ### Initial Database Setup
 
