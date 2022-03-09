@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import Button from './Button';
 import SourcesSelector from './SourcesSelector';
 
@@ -10,6 +10,7 @@ interface specificLevel {
 // creates different button options to look into the data
 // geoLevel = specific area of interest
 // geoCode = the parameter for the different searches
+// fades out buttons with no actual data
 export default function ButtonOptions(props:specificLevel) {
     const casesUrl:string = 'http://127.0.0.1:8000/info-from-area/?area=' + props.geoLevel + '&info-type=cases&area-code=' + props.geoCode;
     const vaccinationsUrl:string = 'http://127.0.0.1:8000/info-from-area/?area=' + props.geoLevel + '&info-type=vaccinations&area-code=' + props.geoCode;
@@ -23,6 +24,13 @@ export default function ButtonOptions(props:specificLevel) {
     const ageSourceUrl:string = 'http://127.0.0.1:8000/sources-from-info-and-area/?area=' + props.geoLevel + '&info-type=age&area-code=' + props.geoCode;
     const [chosenUrl, setChosenUrl] = useState<string>("");
     const [sourceUrl, setSourceUrl] = useState<string>("");
+    useEffect(() => {
+        const updateSourceOptions =  async () => {
+            setChosenUrl("");
+            setSourceUrl("");
+        };
+        updateSourceOptions();
+    }, [props.geoCode]);
     const casesFunction = (event:React.MouseEvent<HTMLButtonElement>):void => {
         setChosenUrl(casesUrl);
         setSourceUrl(casesSourceUrl);
@@ -43,9 +51,7 @@ export default function ButtonOptions(props:specificLevel) {
         setChosenUrl(ageUrl);
         setSourceUrl(ageSourceUrl);
     }
-    const onClickFunctionz = (event:React.MouseEvent<HTMLButtonElement>):void => {
-        console.log("please work");
-    }
+
     return (
         <div>
             <div>
@@ -56,7 +62,7 @@ export default function ButtonOptions(props:specificLevel) {
                 <Button onClickFunction={populationFunction} url={populationUrl} buttonName='population'/>
                 <Button onClickFunction={agesFunction} url={ageUrl} buttonName='age'/>
             </div>
-            <SourcesSelector dataUrl = {chosenUrl} sourceUrl = {sourceUrl} onClickFunction={onClickFunctionz} />
+            <SourcesSelector dataUrl = {chosenUrl} sourceUrl = {sourceUrl}/>
         </div>
     );
 }

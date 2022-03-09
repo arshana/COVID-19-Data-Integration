@@ -4,6 +4,10 @@ import ButtonOptions from './components/ButtonOptions';
 import DropDown  from './components/DropDown';
 import InteractionPanel from './components/InteractionPanel';
 
+// app with options to select Country, Region, and District
+// will then give options to query on select types of information
+// can filter queries on sources
+// return results in a new tab
 function App() {
   const [selectedCountry, changeCountry] = useState<string>("")
   const countryFunction = (event:React.ChangeEvent<HTMLSelectElement>):void => {
