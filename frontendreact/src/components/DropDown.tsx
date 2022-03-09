@@ -20,7 +20,6 @@ export default function DropDown(props: DropDownProp) {
         };
         updateGeoOptions();
     }, [props.urlEnding]);
-    console.log(options);
     return (
         <div>
         {options.length > 0 ?
